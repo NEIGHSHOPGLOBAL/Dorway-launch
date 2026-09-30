@@ -1,0 +1,277 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---- Accounts -------------------------------------------------------
+
+enum OnboardingStep {
+  IDENTIFIED
+  PROFILED
+  PLAN_SELECTED
+  PAYING
+  PAID
+  SETUP_STARTED
+  SETUP_SUBMITTED
+  PROVISIONED
+  ACTIVE
+}
+
+model User {
+  id                   String         @id @default(uuid())
+  email                String?        @unique
+  phone                String?        @unique
+  phoneVerified        Boolean        @default(false) @map("phone_verified")
+  fullName             String?        @map("full_name")
+  businessName         String?        @map("business_name")
+  businessCity         String?        @map("business_city")
+  gstin                String?
+  billingStateCode     String?        @map("billing_state_code")
+  emailVerified        Boolean        @default(false) @map("email_verified")
+  onboardingStep       OnboardingStep @default(IDENTIFIED) @map("onboarding_step")
+  onboardingUpdatedAt  DateTime       @default(now()) @updatedAt @map("onboarding_updated_at")
+  createdAt            DateTime       @default(now()) @map("created_at")
+  lastLoginAt          DateTime?      @map("last_login_at")
+
+  orders             Order[]
+  entitlements       Entitlement[]
+  onboardingProfile  OnboardingProfile?
+  onboardingDocuments OnboardingDocument[]
+
+  @@map("users")
+}
+
+model LoginOtp {
+  id         String    @id @default(uuid())
+  email      String?
+  phone      String?
+  channel    String    @default("email") // "email" | "whatsapp"
+  codeHash   String    @map("code_hash")
+  expiresAt  DateTime  @map("expires_at")
+  attempts   Int       @default(0)
+  consumedAt DateTime? @map("consumed_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@index([email, createdAt(sort: Desc)])
+  @@index([phone, createdAt(sort: Desc)])
+  @@map("login_otps")
+}
+
+// ---- Catalogue --------------------------------------------------------
+
+model Plan {
+  code             String   @id
+  name             String
+  normalPaiseMonth BigInt   @map("normal_paise_month")
+  earlyPaiseMonth  BigInt   @map("early_paise_month")
+  seatCap          Int?     @map("seat_cap")
+  numberCap        Int      @map("number_cap")
+  features         Json
+  sortOrder        Int      @map("sort_order")
+  isActive         Boolean  @default(true) @map("is_active")
+
+  orders       Order[]
+  entitlements Entitlement[]
+
+  @@map("plans")
+}
+
+model LaunchConfig {
+  id                  Int      @id @default(1)
+  launchAt            DateTime @map("launch_at")
+  earlyBirdEndsAt      DateTime @map("early_bird_ends_at")
+  earlyBirdSeatCap     Int?     @map("early_bird_seat_cap")
+  earlyBirdForceClose  Boolean  @default(false) @map("early_bird_force_close")
+  checkoutEnabled      Boolean  @default(true) @map("checkout_enabled")
+  gstPercent           Decimal  @default(18.00) @map("gst_percent") @db.Decimal(5, 2)
+  updatedAt            DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("launch_config")
+}
+
+// ---- Commerce ---------------------------------------------------------
+
+enum OrderStatus {
+  CREATED
+  PENDING
+  PAID
+  FAILED
+  EXPIRED
+  REFUNDED
+}
+
+model Order {
+  id                    String      @id @default(uuid())
+  userId                String      @map("user_id")
+  planCode              String      @map("plan_code")
+  termMonths            Int         @map("term_months")
+  isEarlyBird           Boolean     @map("is_early_bird")
+  ratePaiseMonth        BigInt      @map("rate_paise_month")
+  subtotalPaise         BigInt      @map("subtotal_paise")
+  cgstPaise             BigInt      @default(0) @map("cgst_paise")
+  sgstPaise             BigInt      @default(0) @map("sgst_paise")
+  igstPaise             BigInt      @default(0) @map("igst_paise")
+  placeOfSupply         String?     @map("place_of_supply")
+  totalPaise            BigInt      @map("total_paise")
+  currency              String      @default("INR")
+  status                OrderStatus @default(CREATED)
+  cfOrderId             String?     @unique @map("cf_order_id")
+  cfPaymentSessionId    String?     @map("cf_payment_session_id")
+  idempotencyKey        String      @unique @map("idempotency_key")
+  createdAt             DateTime    @default(now()) @map("created_at")
+  paidAt                DateTime?   @map("paid_at")
+  expiresAt             DateTime    @map("expires_at")
+
+  user        User         @relation(fields: [userId], references: [id])
+  plan        Plan         @relation(fields: [planCode], references: [code])
+  payments    Payment[]
+  entitlement Entitlement?
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([status])
+  @@map("orders")
+}
+
+model Payment {
+  id          String   @id @default(uuid())
+  orderId     String   @map("order_id")
+  cfPaymentId String   @unique @map("cf_payment_id")
+  status      String
+  method      String?
+  amountPaise BigInt   @map("amount_paise")
+  bankRef     String?  @map("bank_ref")
+  raw         Json
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@map("payments")
+}
+
+model WebhookEvent {
+  id           String    @id @default(uuid())
+  dedupeKey    String    @unique @map("dedupe_key")
+  eventType    String    @map("event_type")
+  signatureOk  Boolean   @map("signature_ok")
+  raw          Json
+  receivedAt   DateTime  @default(now()) @map("received_at")
+  processedAt  DateTime? @map("processed_at")
+  error        String?
+
+  @@map("webhook_events")
+}
+
+// ---- What the customer actually bought -------------------------------
+
+enum EntitlementStatus {
+  PENDING_LAUNCH
+  ACTIVE
+  EXPIRED
+  REFUNDED
+  CANCELLED
+}
+
+model Entitlement {
+  id              String            @id @default(uuid())
+  userId          String            @map("user_id")
+  orderId         String            @unique @map("order_id")
+  planCode        String            @map("plan_code")
+  ratePaiseMonth  BigInt            @map("rate_paise_month")
+  termMonths      Int               @map("term_months")
+  accessStartsAt  DateTime          @map("access_starts_at")
+  accessEndsAt    DateTime          @map("access_ends_at")
+  status          EntitlementStatus @default(PENDING_LAUNCH)
+  crmTenantId     String?           @map("crm_tenant_id")
+  provisionedAt   DateTime?         @map("provisioned_at")
+  createdAt       DateTime          @default(now()) @map("created_at")
+
+  user  User  @relation(fields: [userId], references: [id])
+  order Order @relation(fields: [orderId], references: [id])
+  plan  Plan  @relation(fields: [planCode], references: [code])
+
+  @@map("entitlements")
+}
+
+// ---- Everyone who didn't buy -----------------------------------------
+
+model Waitlist {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  source     String?
+  planIntent String?  @map("plan_intent")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("waitlist")
+}
+
+// ---- Onboarding / setup ------------------------------------------------
+
+model OnboardingProfile {
+  userId              String    @id @map("user_id")
+
+  // A: number
+  waNumber            String?   @map("wa_number")
+  waOnConsumerApp      Boolean?  @map("wa_on_consumer_app")
+  waCurrentPlatform    String?   @map("wa_current_platform")
+  waOtpReachable       String?   @map("wa_otp_reachable")
+
+  // B: business
+  legalName           String?   @map("legal_name")
+  registeredAddress   String?   @map("registered_address")
+  billingStateCode    String?   @map("billing_state_code")
+  website             String?
+  businessEmail       String?   @map("business_email")
+  metaBusinessId      String?   @map("meta_business_id")
+  facebookPage        String?   @map("facebook_page")
+  waDisplayName       String?   @map("wa_display_name")
+
+  // D: existing credentials (kind='wa_system_user_token' rows live in
+  // tenant_credentials-style storage — see OnboardingDocument note below;
+  // kept out of scope for launch per onboarding.md §13 "can wait")
+  hasExistingWaba      Boolean?  @map("has_existing_waba")
+  existingWabaId       String?   @map("existing_waba_id")
+  existingPhoneId      String?   @map("existing_phone_id")
+  existingPlatform     String?   @map("existing_platform")
+
+  sectionADone        Boolean   @default(false) @map("section_a_done")
+  sectionBDone        Boolean   @default(false) @map("section_b_done")
+  sectionCDone        Boolean   @default(false) @map("section_c_done")
+  submittedAt         DateTime? @map("submitted_at")
+  updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("onboarding_profiles")
+}
+
+model OnboardingDocument {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  kind        String   // 'incorporation' | 'address_proof' | 'pan' | 'other'
+  storageKey  String   @map("storage_key")
+  filename    String
+  mimeType    String   @map("mime_type")
+  sizeBytes   Int      @map("size_bytes")
+  scannedOk   Boolean? @map("scanned_ok")
+  uploadedAt  DateTime @default(now()) @map("uploaded_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("onboarding_documents")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  actor     String
+  action    String
+  subject   String?
+  meta      Json?
+  ip        String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("audit_log")
+}

@@ -1,0 +1,79 @@
+DORWAY — ASSET MANIFEST
+========================
+What's already built in code vs. what you still need to go grab.
+Cross-referenced against landingpage.md §5.
+k
+
+ALREADY DONE — nothing to download
+-----------------------------------
+- Logo mark + wordmark        -> inline SVG in index.html (nav + footer), theme-aware via currentColor
+- Favicon (all sizes)         -> assets/favicon.svg, favicon-32.png, apple-touch-icon.png, icon-512.png
+                                  (generated from the SVG mark with ImageMagick — already wired into <head>)
+- Hero background wash        -> CSS gradient (css/styles.css .hero-wash), animated, no image needed
+- Decorative blobs            -> CSS radial-gradient (css/styles.css .decor-blob), no image needed
+- All product mockups         -> built in HTML/CSS per spec's "build in code" rule (inbox, assignment,
+                                  sequences, campaigns, pipeline, connection status, composer states,
+                                  sequence builder, account health strip) — these must never be AI-generated
+                                  images, since they contain UI text that image models garble
+- Fonts                       -> Google Fonts CDN, already linked (Comfortaa, Inter, JetBrains Mono)
+- Icons                       -> inline SVG (lucide-style paths), already in the HTML
+- Scroll animation library    -> AOS via CDN (unpkg.com/aos@2.3.4), already wired in index.html + js/main.js
+
+
+STILL NEEDED — grab these before launch
+-----------------------------------------
+
+1) TESTIMONIAL AVATARS x6  (section 4.9, ASSET 13)
+   Spec: 200x200 round crop, warm natural light, plain background, business-casual,
+   Indian SMB owners/sales leads, mixed gender, ages ~28-50.
+   DO NOT use AI-generated faces — spec flags this explicitly, and it undermines the
+   one section whose whole job is credibility. Use real customers (with permission)
+   or a licensed stock portrait set.
+
+   Search starting points:
+   - https://unsplash.com/s/photos/indian-business-owner-portrait
+   - https://unsplash.com/s/photos/indian-entrepreneur-portrait
+   - https://www.pexels.com/search/indian%20business%20professional/
+   - https://www.pexels.com/search/indian%20entrepreneur%20portrait/
+
+   Where they go: index.html, .testimonial-person > .avatar (currently initials-only
+   placeholders — swap each <span class="avatar avatar-md"> for an <img>).
+
+2) OPEN GRAPH IMAGE  (section 4.13, ASSET 14)
+   Spec: 1200x630 PNG. Mint wash background, logo top-left, hero headline at ~56px,
+   cropped hero inbox panel bleeding off the bottom-right. Must read at thumbnail size
+   (WhatsApp link previews compress hard).
+   Referenced at: index.html <meta property="og:image" content="/assets/og-image.png">
+   — this file does not exist yet, meta tag currently points to a path with nothing behind it.
+
+   Fastest path: screenshot the hero panel (already built, see .hero-panel in index.html)
+   and composite it over a 1200x630 mint canvas in Figma/Canva.
+   - https://www.canva.com/templates/?query=open-graph-image
+   - https://www.figma.com/community/search?resource_type=files&query=og%20image%20template
+
+3) REAL PROOF-STRIP NUMBER  (section 4.3)
+   "Under 60 sec" is an invented placeholder per spec — replace with a measured figure
+   from actual usage, or delete that stat tile. Not an asset to source, just don't ship
+   the placeholder as fact.
+
+4) REAL TESTIMONIAL QUOTES  (section 4.9)
+   All 6 quotes in the page right now are spec-provided placeholder copy showing the
+   *shape* real testimonials should take. Swap for real, permissioned quotes before
+   launch, or remove the section — fabricated testimonials are a legal problem.
+
+
+OPTIONAL / NICE-TO-HAVE
+-------------------------
+- Real photo for hero background wash instead of the CSS gradient (not required —
+  current gradient is intentional and matches the "build in code" rule, but if you
+  want texture/grain over it): https://unsplash.com/s/photos/soft-gradient-texture
+- Product screen recording for a future video/demo section (not part of this page):
+  none needed right now.
+
+
+NOTES
+-----
+- Everything above marked "already done" needs zero external downloads — don't waste
+  time sourcing images for things already built in HTML/CSS.
+- Only items 1 and 2 above are hard blockers for a real launch (item 3 and 4 are
+  copy/data decisions, not asset-sourcing tasks).

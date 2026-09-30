@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dorway — WhatsApp CRM for teams that sell through conversations</title>
+<meta name="description" content="Every enquiry lands in one shared inbox on your own WhatsApp Business number. Leads get assigned automatically, follow-ups run on their own, and nothing lives on anyone's personal phone.">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Dorway — WhatsApp CRM for teams that sell through conversations">
+<meta property="og:description" content="Your number, your WhatsApp Business Account, your data. Shared inbox, automatic lead assignment, and follow-ups that actually happen.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Dorway — your team already sells on WhatsApp, now you can actually run it">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Dorway — WhatsApp CRM for teams that sell through conversations">
+<meta name="twitter:description" content="Your number, your WhatsApp Business Account, your data. Shared inbox, automatic lead assignment, and follow-ups that actually happen.">
+<meta name="twitter:image" content="/assets/og-image.png">
+
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="512x512" href="assets/icon-512.png">
+
+<!-- Fonts: Comfortaa (display), Inter (UI), JetBrains Mono (data) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<header class="nav">
+  <div class="container nav-inner">
+    <a href="#" class="logo" aria-label="Dorway home">
+      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M6,36 L6,20 A14,14 0 0 1 34,20 L34,36 L27,36 L27,21 A7,7 0 0 0 13,21 L13,36 Z"/>
+      </svg>
+      <span class="logo-text">Dorway</span>
+    </a>
+
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+
+    <div class="nav-right">
+      <button class="theme-toggle" aria-label="Toggle dark mode">
+        <svg data-icon-sun viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        <svg data-icon-moon viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <a href="#" class="login-link">Log in</a>
+      <a href="#" class="btn btn-primary btn-nav">Start free</a>
+      <button class="hamburger" aria-label="Open menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-drawer">
+  <div class="mobile-drawer-backdrop"></div>
+  <div class="mobile-drawer-panel">
+    <button class="mobile-drawer-close" aria-label="Close menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#faq">FAQ</a>
+    <a href="#">Log in</a>
+    <a href="#" class="btn btn-primary" style="width:100%; margin-top:8px;">Start free</a>
+  </div>
+</div>
+
+<main>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="hero-wash" aria-hidden="true"></div>
+    <div class="decor-blob b-lime" style="width:340px; height:340px; top:-40px; left:-80px;" aria-hidden="true"></div>
+    <div class="decor-blob b-sun" style="width:280px; height:280px; top:60px; right:-60px;" aria-hidden="true"></div>
+    <div class="container hero-content" data-aos="fade-up">
+      <h1 class="hero-headline">Your team already sells on WhatsApp.<br>Now you can actually run it.</h1>
+      <p class="lead hero-lead">Every enquiry lands in one shared inbox on your own WhatsApp Business number. Leads get assigned the moment they arrive, follow-ups run on their own, and nothing lives on anyone's personal phone.</p>
+
+      <div class="hero-buttons">
+        <a href="#" class="btn btn-primary">Start free</a>
+        <a href="#features" class="btn btn-secondary">See how it works</a>
+      </div>
+      <p class="hero-reassurance">No card required · Bring your own WhatsApp number · Set up in a day</p>
+    </div>
+
+    <div class="container">
+      <div class="hero-visual-wrap" data-aos="fade-up" data-aos-delay="150">
+        <div class="card hero-panel hero-panel-img">
+          <img class="hero-screenshot" src="assets/hero-product-screenshot.png" alt="DORWAY leads inbox showing a live WhatsApp conversation, AI-assisted replies, and lead details" width="1699" height="926" loading="eager">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PROOF STRIP ============ -->
+  <section class="proof-strip">
+    <div class="container proof-item-wrap" style="display:flex; justify-content:center; flex-wrap:wrap;">
+      <div class="proof-item" data-aos="fade-up" data-aos-delay="0">
+        <div class="proof-number">Under 60 sec</div>
+        <div class="proof-label">average first response</div>
+      </div>
+      <div class="proof-item" data-aos="fade-up" data-aos-delay="80">
+        <div class="proof-number">100%</div>
+        <div class="proof-label">of chats kept on the business account</div>
+      </div>
+      <div class="proof-item" data-aos="fade-up" data-aos-delay="160">
+        <div class="proof-number">Zero</div>
+        <div class="proof-label">leads assigned by hand</div>
+      </div>
+      <div class="proof-item" data-aos="fade-up" data-aos-delay="240">
+        <div class="proof-number">Your</div>
+        <div class="proof-label">number, your data</div>
+      </div>
+    </div>
+    <!-- [VERIFY] first figure is a placeholder per spec §4.3 — replace with a measured number or remove before launch -->
+  </section>
+
+  <!-- ============ BENTO FEATURE GRID ============ -->
+  <section id="features">
+    <div class="decor-blob b-green" style="width:420px; height:420px; top:-120px; right:-140px;" aria-hidden="true"></div>
+    <div class="decor-blob b-lime" style="width:300px; height:300px; bottom:-100px; left:-100px;" aria-hidden="true"></div>
+    <div class="container">
+      <div class="section-header" data-aos="fade-up">
+        <h2 class="section-headline">Everything your team needs to close on WhatsApp</h2>
+        <p class="lead">Built for the way small sales teams actually work — one number, several people, and a lot of conversations that can't be dropped.</p>
+      </div>
+
+      <div class="bento-grid">
+
+        <!-- Card 1: Shared inbox -->
+        <div class="card bento-card span-3" data-aos="fade-up" data-aos-delay="0">
+          <div class="bento-mock">
+            <div class="mini-inbox-row selected">
+              <span class="avatar avatar-sm">RV</span>
+              <div class="mini-row-text"><div class="mini-row-name">Rahul Verma</div><div class="mini-row-preview">Sure, sending two projects nearby now...</div></div>
+              <span class="mini-row-time">10:03 AM</span>
+            </div>
+            <div class="mini-inbox-row">
+              <span class="avatar avatar-sm" style="background:var(--amber)">KJ</span>
+              <div class="mini-row-text"><div class="mini-row-name">Kiran Joshi</div><div class="mini-row-preview">What time does the clinic open on Sat...</div></div>
+              <span class="unread-dot"></span>
+            </div>
+            <div class="mini-inbox-row">
+              <span class="avatar avatar-sm" style="background:var(--clay)">TS</span>
+              <div class="mini-row-text"><div class="mini-row-name">Tara Singh</div><div class="mini-row-preview">Thanks, that works for me</div></div>
+              <span class="mini-row-time">Yesterday</span>
+            </div>
+            <div class="mini-inbox-row">
+              <span class="avatar avatar-sm" style="background:#5A6B65">DP</span>
+              <div class="mini-row-text"><div class="mini-row-name">Deepak Patil</div><div class="mini-row-preview">Can you call me instead?</div></div>
+              <span class="unread-dot"></span>
+            </div>
+          </div>
+          <div>
+            <h3 class="card-title">Shared team inbox</h3>
+            <p>Every conversation in one place. Your whole team works from the same WhatsApp number, sees the full history on every lead, and picks up where someone else left off. Nothing is trapped on a personal phone.</p>
+          </div>
+        </div>
+
+        <!-- Card 2: Auto assignment -->
+        <div class="card bento-card span-3" data-aos="fade-up" data-aos-delay="100">
+          <div class="bento-mock">
+            <div class="assign-lead-card">New enquiry — Malviya Nagar</div>
+            <div class="assign-row">
+              <div class="assign-avatar-wrap active"><span class="avatar avatar-md">PR</span><span class="caption mono" style="font-size:11px;">Priya</span></div>
+              <div class="assign-avatar-wrap"><span class="avatar avatar-md" style="background:var(--green-deep)">RK</span><span class="caption mono" style="font-size:11px;">Rahul</span></div>
+              <div class="assign-avatar-wrap"><span class="avatar avatar-md" style="background:var(--amber)">AN</span><span class="caption mono" style="font-size:11px;">Anjali</span></div>
+              <div class="assign-avatar-wrap"><span class="avatar avatar-md" style="background:var(--clay)">SK</span><span class="caption mono" style="font-size:11px;">Sanjay</span></div>
+            </div>
+            <div class="text-center mono" style="color:var(--green-deep);">next: Priya</div>
+          </div>
+          <div>
+            <h3 class="card-title">Leads assign themselves</h3>
+            <p>New enquiry arrives, the next salesperson in the rotation gets it. No manager forwarding numbers at midnight, no two people calling the same lead, no lead sitting untouched because everyone assumed someone else had it.</p>
+          </div>
+        </div>
+
+        <!-- Card 3: Follow-ups -->
+        <div class="card bento-card span-2" data-aos="fade-up" data-aos-delay="0">
+          <div class="bento-mock">
+            <div class="seq-timeline">
+              <div class="seq-node">
+                <span class="seq-dot done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                <div><div class="seq-node-title">Day 2 · Sent</div><div class="seq-node-detail">Just checking in on the quote</div></div>
+              </div>
+              <div class="seq-node">
+                <span class="seq-dot done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                <div><div class="seq-node-title">Day 5 · Sent</div><div class="seq-node-detail">Template: pricing_followup_v2</div></div>
+              </div>
+              <div class="seq-node">
+                <span class="seq-dot pending"></span>
+                <div><div class="seq-node-title">Day 10 · Scheduled</div><div class="seq-node-detail">Notify assignee + status nudge</div></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3 class="card-title">Follow-ups that happen</h3>
+            <p>Set the rule once — day two, day five, day ten. The system sends it whether or not anyone remembered. Most deals are lost to silence, not to a competitor.</p>
+          </div>
+        </div>
+
+        <!-- Card 4: Campaigns -->
+        <div class="card bento-card span-2" data-aos="fade-up" data-aos-delay="100">
+          <div class="bento-mock">
+            <div class="campaign-template">
+              Hi <span class="mono">{{1}}</span>, your interior quote of <span class="mono">{{2}}</span> is ready to view.
+              <div style="margin-top:8px;"><span class="pill pill-green">Approved</span></div>
+            </div>
+            <div class="campaign-stats">
+              <div><div class="campaign-stat-num">1,240</div><div class="campaign-stat-label">sent</div></div>
+              <div><div class="campaign-stat-num">1,190</div><div class="campaign-stat-label">delivered</div></div>
+              <div><div class="campaign-stat-num">312</div><div class="campaign-stat-label">replied</div></div>
+            </div>
+          </div>
+          <div>
+            <h3 class="card-title">Campaigns to your whole list</h3>
+            <p>Send an approved template to a filtered segment — everyone marked Interested in Jaipur, say — and watch delivery, reads and replies come back into the same inbox.</p>
+          </div>
+        </div>
+
+        <!-- Card 5: Pipeline -->
+        <div class="card bento-card span-2" data-aos="fade-up" data-aos-delay="200">
+          <div class="bento-mock">
+            <div class="pipeline-cols">
+              <div class="pipeline-col"><div class="pipeline-col-head">New · 6</div><div class="pipeline-card">Kiran J.</div><div class="pipeline-card">Deepak P.</div></div>
+              <div class="pipeline-col"><div class="pipeline-col-head">Contacted · 4</div><div class="pipeline-card">Rahul V.</div></div>
+              <div class="pipeline-col"><div class="pipeline-col-head">Interested · 3</div><div class="pipeline-card">Tara S.</div></div>
+              <div class="pipeline-col"><div class="pipeline-col-head">Negotiating · 2</div><div class="pipeline-card">Anil M.</div></div>
+              <div class="pipeline-col won"><div class="pipeline-col-head">Won · 5</div><div class="pipeline-card">Neha R.</div></div>
+            </div>
+          </div>
+          <div>
+            <h3 class="card-title">Pipeline you can see</h3>
+            <p>New, Contacted, Interested, Negotiating, Won, Lost. Every lead sits in exactly one column, and you can tell at a glance where the month is going.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DEEP DIVE 1 — Onboarding & ownership ============ -->
+  <section>
+    <div class="container">
+      <div class="deep-dive">
+        <div class="deep-dive-text" data-aos="fade-right">
+          <span class="eyebrow">Your account, not ours</span>
+          <h2 class="section-headline" style="font-size:40px;">Your business number. Your WhatsApp account.</h2>
+          <p class="lead" style="font-size:19px;">You connect your own WhatsApp Business Account through Meta's official sign-up flow — a few screens, inside Dorway, no Business Manager spelunking. The number stays yours. The account stays in your name. If you ever leave, you keep both.</p>
+          <p class="lead" style="font-size:19px;">We track the two parts everyone gets stuck on: Meta's verification of your business, and approval of your message templates. You get a plain-English status for each and a clear list of what's blocking you, instead of an error code and a shrug.</p>
+          <div class="see-also">
+            <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>What business verification involves</a>
+            <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>How message templates get approved</a>
+          </div>
+        </div>
+        <div class="deep-dive-visual" data-aos="fade-left" data-aos-delay="100">
+          <div class="card status-panel">
+            <div class="status-panel-title">WhatsApp connection</div>
+
+            <div class="status-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <div class="status-row-main">
+                <span class="status-row-label">Business account connected</span>
+                <span class="pill pill-green">Connected</span>
+                <span class="status-row-detail mono">+91 98•••••210</span>
+              </div>
+            </div>
+            <div class="status-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+              <div class="status-row-main">
+                <span class="status-row-label">Business verification</span>
+                <span class="pill pill-amber">In review</span>
+                <span class="status-row-detail">Submitted 2 days ago</span>
+              </div>
+            </div>
+            <div class="status-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg>
+              <div class="status-row-main">
+                <span class="status-row-label">Message templates</span>
+                <span class="pill pill-green">4 of 5 approved</span>
+              </div>
+            </div>
+            <div class="status-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              <div class="status-row-main">
+                <span class="status-row-label">Payment method</span>
+                <span class="pill pill-green">Attached</span>
+              </div>
+            </div>
+
+            <a href="#" class="status-panel-link">What's blocking me →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DEEP DIVE 2 — Conversation window ============ -->
+  <section>
+    <div class="container">
+      <div class="deep-dive reverse">
+        <div class="deep-dive-text" data-aos="fade-left">
+          <span class="eyebrow">Built around WhatsApp's rules</span>
+          <h2 class="section-headline" style="font-size:40px;">Know exactly what you can send, and when</h2>
+          <p class="lead" style="font-size:19px;">WhatsApp gives you a 24-hour window to reply freely after a customer messages you. Outside it, you need an approved template. Most teams learn this by having a message silently fail.</p>
+          <p class="lead" style="font-size:19px;">Dorway shows the window counting down on every open chat. Inside it, type whatever you want. Outside it, the composer switches to your approved templates and fills in the customer's details for you. Your team never has to think about the rule — they just see the right composer.</p>
+          <div class="see-also">
+            <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>How the 24-hour window works</a>
+            <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>Managing your template library</a>
+          </div>
+          <!-- [VERIFY] before launch — dorway.txt §2: from 1 Oct 2026, free-form service replies in-window become billable at the utility rate. Confirm current Meta pricing changelog; no copy here or in pricing/FAQ should imply in-window replies are cost-free — only that they are template-free. -->
+        </div>
+        <div class="deep-dive-visual" data-aos="fade-right" data-aos-delay="100">
+          <div class="composer-stack">
+            <div class="card composer-panel">
+              <div class="composer-label">Window open</div>
+              <div class="composer-box">
+                <span>Type a message</span>
+                <span class="mono">23:41 left</span>
+              </div>
+              <div style="display:flex; justify-content:flex-end; margin-top:10px;">
+                <div class="composer-send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
+              </div>
+            </div>
+            <div class="card composer-panel">
+              <div class="composer-label">Window closed</div>
+              <div class="composer-template">
+                <div class="composer-template-name">pricing_followup_v2</div>
+                <div class="composer-template-body">Hi Rahul, your interior quote is ready to view whenever you'd like.</div>
+              </div>
+              <div class="composer-note">Window closed — send an approved template</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DEEP DIVE 3 — Automation ============ -->
+  <section>
+    <div class="container">
+      <div class="deep-dive">
+        <div class="deep-dive-text" data-aos="fade-right">
+          <span class="eyebrow">Follow-up automation</span>
+          <h2 class="section-headline" style="font-size:40px;">The deal you lost was probably just forgotten</h2>
+          <p class="lead" style="font-size:19px;">A lead goes quiet on day three. Everyone means to check back. Nobody does. Two weeks later they've bought from someone who did.</p>
+          <p class="lead" style="font-size:19px;">Build the sequence once and it runs on every lead that matches — a nudge on day two, a template on day five, a status change and a reminder to the salesperson on day ten. Anyone replies, the sequence stops and the chat lands back in the inbox as a live conversation.</p>
+          <div class="see-also">
+            <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>Building a follow-up sequence</a>
+            <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>Bulk campaigns and segments</a>
+          </div>
+        </div>
+        <div class="deep-dive-visual" data-aos="fade-left" data-aos-delay="100">
+          <div class="card builder-panel">
+            <div class="builder-toggle-row">
+              <span class="card-title" style="font-size:18px;">New sequence</span>
+              <span class="toggle-pill"><span class="toggle-dot"></span>Sequence active</span>
+            </div>
+            <div class="builder-trigger">
+              <strong>When</strong> lead status is <strong>Contacted</strong> and no reply for <strong>2 days</strong>
+            </div>
+            <div class="builder-action">
+              <svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9 22 2z"/></svg>
+              <span class="builder-action-text">Send template: pricing_followup_v2</span>
+            </div>
+            <div class="builder-action">
+              <svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span class="builder-action-text">Wait 3 days</span>
+            </div>
+            <div class="builder-action" style="margin-bottom:0;">
+              <svg class="grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span class="builder-action-text">Notify assignee</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ACCOUNT HEALTH ============ -->
+  <section>
+    <div class="container">
+      <div class="card health-panel" data-aos="fade-up">
+        <h2 class="section-headline">Your account health, in the open</h2>
+        <p class="lead" style="max-width:640px; margin:16px auto 0;">Meta rates every WhatsApp Business Account on quality and gives it a sending limit. Most tools hide this. If your rating drops or your limit changes, you find out here first — not when your campaign stops going out.</p>
+
+        <div class="health-strip">
+          <div class="health-strip-cell">
+            <div class="health-strip-label">Quality rating</div>
+            <div class="health-strip-value" style="color:var(--green);">High</div>
+            <div class="sparkline" aria-hidden="true">
+              <span style="height:40%"></span><span style="height:55%"></span><span style="height:45%"></span><span style="height:70%"></span><span style="height:60%"></span><span style="height:80%"></span><span style="height:75%"></span><span style="height:90%"></span><span style="height:85%"></span><span style="height:95%"></span>
+            </div>
+          </div>
+          <div class="health-strip-cell">
+            <div class="health-strip-label">Sending limit</div>
+            <div class="health-strip-value">1,000 <span style="font-size:16px; color:var(--ink-soft); font-family:'Inter',sans-serif; font-weight:400;">/ 24h</span></div>
+            <div class="progress-track"><div class="progress-fill" style="width:40%;"></div></div>
+            <div class="caption" style="margin-top:8px;">Next tier at 10,000</div>
+          </div>
+          <div class="health-strip-cell">
+            <div class="health-strip-label">Templates</div>
+            <div class="template-list">
+              <div class="template-list-row"><span>pricing_followup_v2</span><span class="pill pill-green">Approved</span></div>
+              <div class="template-list-row"><span>welcome_message</span><span class="pill pill-green">Approved</span></div>
+              <div class="template-list-row"><span>appointment_reminder</span><span class="pill pill-green">Approved</span></div>
+              <div class="template-list-row"><span>festive_offer_v1</span><span class="pill pill-amber">In review</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="health-support">
+          <div class="health-support-item" data-aos="fade-up" data-aos-delay="0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            <h3>Quality rating</h3>
+            <p>See your current rating and what moved it, per number.</p>
+          </div>
+          <div class="health-support-item" data-aos="fade-up" data-aos-delay="100">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M4.6 15a8 8 0 1 1 14.8 0"/><line x1="12" y1="12" x2="15" y2="9"/></svg>
+            <h3>Sending limit</h3>
+            <p>Know how many business-initiated conversations you can start in 24 hours, and when the tier steps up.</p>
+          </div>
+          <div class="health-support-item" data-aos="fade-up" data-aos-delay="200">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg>
+            <h3>Template status</h3>
+            <p>Every template, its approval state, and the reason if it was rejected.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TESTIMONIALS ============ -->
+  <!-- Placeholder copy per spec §4.9 — replace with real, permissioned testimonials before launch, or remove this section. Avatars are initials, not AI-generated faces. -->
+  <section>
+    <div class="section-header container" data-aos="fade-up">
+      <h2 class="section-headline">Teams that stopped losing leads</h2>
+    </div>
+
+    <div class="marquee-row" data-aos="fade-up">
+      <div class="marquee-track">
+        <!-- set 1 -->
+        <div class="card testimonial-card">
+          <p class="testimonial-quote">"Four salespeople were running four WhatsApp accounts. When one left, we lost six months of conversations. That can't happen now."</p>
+          <div class="testimonial-person"><span class="avatar avatar-md">RA</span><div><div class="testimonial-name">Rohit Agarwal</div><div class="testimonial-role">Director, Sunstone Interiors</div></div></div>
+        </div>
+        <div class="card testimonial-card">
+          <p class="testimonial-quote">"The rotation alone paid for it. Nobody argues about who got which lead anymore."</p>
+          <div class="testimonial-person"><span class="avatar avatar-md" style="background:var(--green-deep)">MS</span><div><div class="testimonial-name">Meera Shah</div><div class="testimonial-role">Sales Head, Vedant Diagnostics</div></div></div>
+        </div>
+        <div class="card testimonial-card">
+          <p class="testimonial-quote">"We were forgetting follow-ups on maybe a third of enquiries. Now it just happens on day two and day five."</p>
+          <div class="testimonial-person"><span class="avatar avatar-md" style="background:var(--amber)">KM</span><div><div class="testimonial-name">Karan Malhotra</div><div class="testimonial-role">Founder, Loop Fitness</div></div></div>
+        </div>
+        <!-- set 2 (duplicate for seamless loop) -->
+        <div class="card testimonial-card" aria-hidden="true">
+          <p class="testimonial-quote">"Four salespeople were running four WhatsApp accounts. When one left, we lost six months of conversations. That can't happen now."</p>
+          <div class="testimonial-person"><span class="avatar avatar-md">RA</span><div><div class="testimonial-name">Rohit Agarwal</div><div class="testimonial-role">Director, Sunstone Interiors</div></div></div>
+        </div>
+        <div class="card testimonial-card" aria-hidden="true">
+          <p class="testimonial-quote">"The rotation alone paid for it. Nobody argues about who got which lead anymore."</p>
+          <div class="testimonial-person"><span class="avatar avatar-md" style="background:var(--green-deep)">MS</span><div><div class="testimonial-name">Meera Shah</div><div class="testimonial-role">Sales Head, Vedant Diagnostics</div></div></div>
+        </div>
+        <div class="card testimonial-card" aria-hidden="true">
+          <p class="testimonial-quote">"We were forgetting follow-ups on maybe a third of enquiries. Now it just happens on day two and day five."</p>
+          <div class="testimonial-person"><span class="avatar avatar-md" style="background:var(--amber)">KM</span><div><div class="testimonial-name">Karan Malhotra</div><div class="testimonial-role">Founder, Loop Fitness</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="marquee-row" data-aos="fade-up" data-aos-delay="100">
+      <div class="marquee-track reverse">
+        <!-- set 1 -->
+        <div class="card testimonial-card">
+          <p class="testimonial-quote">"Our old tool put everything on a shared number we didn't control. Owning the account was non-negotiable for us."</p>
+          <div class="testimonial-person"><span class="avatar avatar-md" style="background:var(--clay)">PN</span><div><div class="testimonial-name">Priya Nair</div><div class="testimonial-role">Operations, Anand Realty</div></div></div>
+        </div>
+        <div class="card testimonial-card">
+          <p class="testimonial-quote">"Setup took a day, including the Meta verification wait. I'd budgeted a week."</p>
+          <div class="testimonial-person"><span class="avatar avatar-md" style="background:#5A6B65">SG</span><div><div class="testimonial-name">Sanjay Gupta</div><div class="testimonial-role">Partner, Gupta &amp; Sons Traders</div></div></div>
+        </div>
+        <div class="card testimonial-card">
+          <p class="testimonial-quote">"I can see the whole month's pipeline on one screen at 8am. That's the entire product for me."</p>
+          <div class="testimonial-person"><span class="avatar avatar-md">AD</span><div><div class="testimonial-name">Anjali Desai</div><div class="testimonial-role">Business Head, Coastline Travel</div></div></div>
+        </div>
+        <!-- set 2 -->
+        <div class="card testimonial-card" aria-hidden="true">
+          <p class="testimonial-quote">"Our old tool put everything on a shared number we didn't control. Owning the account was non-negotiable for us."</p>
+          <div class="testimonial-person"><span class="avatar avatar-md" style="background:var(--clay)">PN</span><div><div class="testimonial-name">Priya Nair</div><div class="testimonial-role">Operations, Anand Realty</div></div></div>
+        </div>
+        <div class="card testimonial-card" aria-hidden="true">
+          <p class="testimonial-quote">"Setup took a day, including the Meta verification wait. I'd budgeted a week."</p>
+          <div class="testimonial-person"><span class="avatar avatar-md" style="background:#5A6B65">SG</span><div><div class="testimonial-name">Sanjay Gupta</div><div class="testimonial-role">Partner, Gupta &amp; Sons Traders</div></div></div>
+        </div>
+        <div class="card testimonial-card" aria-hidden="true">
+          <p class="testimonial-quote">"I can see the whole month's pipeline on one screen at 8am. That's the entire product for me."</p>
+          <div class="testimonial-person"><span class="avatar avatar-md">AD</span><div><div class="testimonial-name">Anjali Desai</div><div class="testimonial-role">Business Head, Coastline Travel</div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PRICING ============ -->
+  <!-- [Q14] every figure below is a placeholder per spec — per-seat pricing assumed. Confirm model before launch. -->
+  <section id="pricing">
+    <div class="decor-blob b-lime" style="width:360px; height:360px; top:-100px; left:-120px;" aria-hidden="true"></div>
+    <div class="decor-blob b-sun" style="width:300px; height:300px; bottom:-80px; right:-100px;" aria-hidden="true"></div>
+    <div class="container">
+      <div class="section-header" data-aos="fade-up">
+        <h2 class="section-headline">Simple pricing, per salesperson</h2>
+        <p class="lead">Start free with one seat. Add people as your team grows.</p>
+      </div>
+
+      <div class="pricing-toggle-wrap" data-aos="fade-up">
+        <div class="pricing-toggle" role="group" aria-label="Billing period">
+          <button type="button" class="active" data-mode="monthly" aria-pressed="true">Monthly</button>
+          <button type="button" data-mode="annual" aria-pressed="false">Annual <span class="pricing-badge">2 months free</span></button>
+        </div>
+      </div>
+
+      <div class="pricing-grid">
+
+        <div class="card pricing-card" data-aos="zoom-in" data-aos-delay="0">
+          <div class="pricing-tier-name">Starter</div>
+          <div class="pricing-tier-desc">For one person testing the waters.</div>
+          <div class="pricing-price"><span class="amount">₹0</span></div>
+          <ul class="pricing-features">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>1 salesperson seat</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>1 WhatsApp Business number</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Shared inbox and full chat history</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Lead pipeline and statuses</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>3 message templates</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Email support</li>
+            <li class="note">Meta message charges billed separately</li>
+          </ul>
+          <a href="#" class="btn btn-secondary">Start free</a>
+        </div>
+
+        <div class="card pricing-card popular" data-aos="zoom-in" data-aos-delay="120">
+          <span class="popular-pill">Most popular</span>
+          <div class="pricing-tier-name">Growth</div>
+          <div class="pricing-tier-desc">For teams that live in WhatsApp all day.</div>
+          <div class="pricing-price">
+            <span class="amount" data-monthly="₹1,499" data-annual="₹1,249">₹1,499</span>
+            <span class="period">/month per seat</span>
+          </div>
+          <ul class="pricing-features">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Everything in Starter</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Unlimited seats</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Automatic lead assignment on rotation</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Follow-up sequences</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Bulk campaigns and segments</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Unlimited templates with approval tracking</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Account health and quality monitoring</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Priority support</li>
+          </ul>
+          <a href="#" class="btn btn-primary">Start free</a>
+        </div>
+
+        <div class="card pricing-card" data-aos="zoom-in" data-aos-delay="240">
+          <div class="pricing-tier-name">Scale</div>
+          <div class="pricing-tier-desc">For multi-team and multi-number operations.</div>
+          <div class="pricing-price">
+            <span class="amount" data-monthly="₹2,999" data-annual="₹2,499">₹2,999</span>
+            <span class="period">/month per seat</span>
+          </div>
+          <ul class="pricing-features">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Everything in Growth</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Multiple WhatsApp numbers</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Role-based permissions</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Full audit log of every message sent on your behalf</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>API access</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Dedicated onboarding</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Named account manager</li>
+          </ul>
+          <a href="#" class="btn btn-secondary">Talk to us</a>
+        </div>
+
+      </div>
+
+      <div class="pricing-note" data-aos="fade-up">
+        <strong>About WhatsApp message charges.</strong> Meta charges for conversations separately from your Dorway subscription. You attach your own payment method to your own WhatsApp Business Account and pay Meta directly at their published rates — we don't mark it up or resell it. Your usage is visible inside Dorway so there are no surprises.
+      </div>
+      <!-- [Q13] assumes tenant-pays model. If rebilling with margin is chosen instead, rewrite this note and budget for usage metering, cost attribution, prepaid credits, dunning and float risk. -->
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section id="faq">
+    <div class="container">
+      <div class="section-header" data-aos="fade-up">
+        <h2 class="section-headline">Frequently asked questions</h2>
+      </div>
+
+      <div class="faq-list">
+        <div class="faq-item" data-aos="fade-up" data-aos-delay="0">
+          <button class="faq-question" aria-expanded="false">
+            Do I need my own WhatsApp number?
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">Yes, and that's deliberate. You connect your own WhatsApp Business Account, so the number and the customer relationships stay yours. A fresh number works, or you can move an existing one — though a number currently on the consumer WhatsApp app has to be migrated, which we walk you through.</div></div>
+        </div>
+
+        <div class="faq-item" data-aos="fade-up" data-aos-delay="40">
+          <button class="faq-question" aria-expanded="false">
+            How long does setup take?
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">Connecting the account takes a few minutes. The wait is on Meta's side: your business needs to be verified, and your message templates need to be approved. Both are Meta's processes with Meta's timelines, and we can't promise a date — but we show you exactly which step you're on and what's blocking it.</div></div>
+        </div>
+
+        <div class="faq-item" data-aos="fade-up" data-aos-delay="80">
+          <button class="faq-question" aria-expanded="false">
+            What is the 24-hour window?
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">When a customer messages you, you can reply with anything you like for 24 hours. After that, you need a message template that Meta has approved in advance. Dorway shows the countdown on every chat and switches the composer to your templates automatically when the window closes.</div></div>
+        </div>
+
+        <div class="faq-item" data-aos="fade-up" data-aos-delay="120">
+          <button class="faq-question" aria-expanded="false">
+            What do WhatsApp messages cost?
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">Meta charges per conversation at rates that vary by country and message category. You pay Meta directly from your own account, at their rates, with no markup from us. Your subscription covers the software.</div></div>
+        </div>
+
+        <div class="faq-item" data-aos="fade-up" data-aos-delay="0">
+          <button class="faq-question" aria-expanded="false">
+            Can other businesses on Dorway see my leads?
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">No. Every business on the platform is isolated at the database level — separate data, separate connected accounts, separate real-time channels. Your leads and conversations are visible only to the users you invite.</div></div>
+        </div>
+
+        <div class="faq-item" data-aos="fade-up" data-aos-delay="40">
+          <button class="faq-question" aria-expanded="false">
+            What happens when a salesperson leaves?
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">Their access is revoked and every conversation stays in the shared inbox where their replacement picks it up. Because chats run through your business account rather than their personal phone, nothing walks out the door.</div></div>
+        </div>
+
+        <div class="faq-item" data-aos="fade-up" data-aos-delay="80">
+          <button class="faq-question" aria-expanded="false">
+            Can I import my existing leads?
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">Yes — upload a CSV with names, numbers and any fields you're tracking, and map them to your pipeline stages during import.</div></div>
+        </div>
+
+        <div class="faq-item" data-aos="fade-up" data-aos-delay="120">
+          <button class="faq-question" aria-expanded="false">
+            Is there a contract?
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer"><div class="faq-answer-inner">No. Monthly plans cancel any time. Annual plans are billed upfront for the year. You can export your leads and chat history whenever you like.</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FINAL CTA ============ -->
+  <section class="final-cta-section">
+    <div class="decor-blob b-green" style="width:320px; height:320px; top:-60px; left:10%;" aria-hidden="true"></div>
+    <div class="decor-blob b-sun" style="width:260px; height:260px; bottom:-60px; right:10%;" aria-hidden="true"></div>
+    <div class="container">
+      <div class="final-cta-panel" data-aos="zoom-in">
+        <h2 class="section-headline">Stop losing leads to a forgotten follow-up</h2>
+        <p class="lead">Connect your WhatsApp number and run your first sequence today. Free for one seat, no card required.</p>
+        <div class="final-cta-buttons">
+          <a href="#" class="btn btn-primary">Start free</a>
+          <a href="#" class="btn btn-secondary">Talk to us</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="container">
+    <div class="footer-grid" data-aos="fade-up">
+      <div>
+        <a href="#" class="logo" aria-label="Dorway home">
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M6,36 L6,20 A14,14 0 0 1 34,20 L34,36 L27,36 L27,21 A7,7 0 0 0 13,21 L13,36 Z"/>
+          </svg>
+          <span class="logo-text">Dorway</span>
+        </a>
+        <p class="footer-brand-desc">WhatsApp CRM for teams that sell through conversations. Your number, your data, your customers.</p>
+        <div class="footer-socials">
+          <a href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+          <a href="#" aria-label="Twitter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg></a>
+          <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="#">Integrations</a></li>
+          <li><a href="#">Changelog</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <ul>
+          <li><a href="#">Help centre</a></li>
+          <li><a href="#">Setting up WhatsApp</a></li>
+          <li><a href="#">Message templates</a></li>
+          <li><a href="#">Contact support</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Privacy policy</a></li>
+          <li><a href="#">Terms of service</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="legal-bar">
+      <span>© 2026 Dorway. All rights reserved.</span>
+      <em>Not affiliated with or endorsed by Meta Platforms, Inc. WhatsApp is a trademark of Meta Platforms, Inc.</em>
+    </div>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
