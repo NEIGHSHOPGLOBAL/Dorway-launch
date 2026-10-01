@@ -4,16 +4,18 @@ import { z } from "zod";
 import { db } from "../lib/db.js";
 import { config } from "../lib/config.js";
 import { readSession } from "../lib/session.js";
-import { isEarlyBirdOpen, addMonths, effectiveRatePaise } from "../lib/pricing.js";
+import { addMonths, computeTermPricing, type TermMonths } from "../lib/pricing.js";
 import { cfCreateOrder, cfGetOrder } from "../lib/cashfree.js";
 import { rateLimit } from "../lib/rateLimit.js";
 import { sendReceiptEmail } from "../lib/email.js";
 import { computeGst, GSTIN_RE, stateFromGstin } from "../lib/gst.js";
-import { attributeReferral, logReferralEvent } from "../lib/partnerAttribution.js";
+import { attributeReferral, logReferralEvent, resolveActivePartnerByCode } from "../lib/partnerAttribution.js";
 import { evaluateBonus, reverseCommission } from "../lib/partnerJobs.js";
 import { PARTNER_PROGRAM } from "../lib/partnerProgram.js";
 import { notifyPartner } from "../lib/partnerNotify.js";
 import { logOnboardingEvent } from "../lib/onboardingEvents.js";
+import { logFunnelEvent } from "../lib/funnelEvents.js";
+import { renderInvoicePdf } from "../lib/invoice.js";
 
 export const checkoutRouter = Router();
 
@@ -22,8 +24,16 @@ const checkoutSchema = z.object({
   termMonths: z.union([z.literal(1), z.literal(6), z.literal(12)]),
   stateCode: z.string().length(2),
   gstin: z.string().regex(GSTIN_RE).optional().or(z.literal("")),
+  // userchanges.md C-2 — required so receipts and the GST invoice always
+  // have somewhere to go, even for phone-only accounts.
+  invoiceEmail: z.string().email(),
   referralCode: z.string().optional(), // partners.md §7.1: a typed code overrides the cookie
 });
+
+// userchanges.md X-6 — reuse an unpaid order for the same plan+term created
+// in the last 24h instead of creating a new row every time someone returns
+// to Checkout. Keeps admin order lists clean.
+const ABANDONED_REUSE_WINDOW_MS = 24 * 60 * 60_000;
 
 checkoutRouter.post("/", async (req, res) => {
   const session = await readSession(req);
@@ -60,19 +70,15 @@ checkoutRouter.post("/", async (req, res) => {
     return;
   }
 
-  const sold = await db.order.count({ where: { isEarlyBird: true, status: "PAID" } });
-  const early = isEarlyBirdOpen(new Date(), cfg, sold);
-
-  const ratePaise = effectiveRatePaise(plan, parsed.data.termMonths, early);
-  const subtotal = ratePaise * BigInt(parsed.data.termMonths);
-  const isEarlyBirdRate = ratePaise === plan.earlyPaiseMonth;
+  const termMonths = parsed.data.termMonths as TermMonths;
+  const pricing = computeTermPricing(plan.normalPaiseMonth, termMonths);
 
   // onboarding.md §7.2: a valid GSTIN's state prefix wins over a
   // manually-picked billing state, quietly — never a hard error.
   const stateCode =
     parsed.data.gstin && GSTIN_RE.test(parsed.data.gstin) ? stateFromGstin(parsed.data.gstin) : parsed.data.stateCode;
 
-  const gstBreakdown = computeGst(subtotal, stateCode, config.supplierStateCode);
+  const gstBreakdown = computeGst(pricing.subtotalPaise, stateCode, config.supplierStateCode);
 
   if (parsed.data.referralCode) {
     await attributeReferral({
@@ -86,39 +92,69 @@ checkoutRouter.post("/", async (req, res) => {
   const referral = await db.referral.findUnique({ where: { accountId: user.id } });
   const linkedReferralId = referral && referral.status === "signed_up" ? referral.id : null;
 
-  const order = await db.order.create({
-    data: {
+  const orderData = {
+    userId: user.id,
+    planCode: plan.code,
+    termMonths,
+    isEarlyBird: false,
+    discountPercent: pricing.discountPercent,
+    savingsPaise: pricing.savingsPaise,
+    invoiceEmail: parsed.data.invoiceEmail,
+    ratePaiseMonth: pricing.monthlyRatePaise,
+    subtotalPaise: pricing.subtotalPaise,
+    cgstPaise: gstBreakdown.cgstPaise,
+    sgstPaise: gstBreakdown.sgstPaise,
+    igstPaise: gstBreakdown.igstPaise,
+    placeOfSupply: gstBreakdown.placeOfSupply,
+    totalPaise: gstBreakdown.totalPaise,
+    referralId: linkedReferralId,
+  };
+
+  const reusable = await db.order.findFirst({
+    where: {
       userId: user.id,
       planCode: plan.code,
-      termMonths: parsed.data.termMonths,
-      isEarlyBird: isEarlyBirdRate,
-      ratePaiseMonth: ratePaise,
-      subtotalPaise: subtotal,
-      cgstPaise: gstBreakdown.cgstPaise,
-      sgstPaise: gstBreakdown.sgstPaise,
-      igstPaise: gstBreakdown.igstPaise,
-      placeOfSupply: gstBreakdown.placeOfSupply,
-      totalPaise: gstBreakdown.totalPaise,
-      idempotencyKey: crypto.randomUUID(),
-      expiresAt: new Date(Date.now() + 30 * 60_000),
-      referralId: linkedReferralId,
+      termMonths,
+      status: "CREATED",
+      createdAt: { gte: new Date(Date.now() - ABANDONED_REUSE_WINDOW_MS) },
     },
+    orderBy: { createdAt: "desc" },
   });
+
+  const order = reusable
+    ? await db.order.update({
+        where: { id: reusable.id },
+        data: {
+          ...orderData,
+          idempotencyKey: crypto.randomUUID(),
+          expiresAt: new Date(Date.now() + 30 * 60_000),
+          cfOrderId: null,
+          cfPaymentSessionId: null,
+        },
+      })
+    : await db.order.create({
+        data: {
+          ...orderData,
+          idempotencyKey: crypto.randomUUID(),
+          expiresAt: new Date(Date.now() + 30 * 60_000),
+        },
+      });
 
   if (linkedReferralId) {
     await logReferralEvent(referral!.partnerId, "checkout_started", { source: referral!.attributedVia as "link" | "code", accountId: user.id });
   }
   await logOnboardingEvent(user.id, "PLAN_SELECTED");
+  await logFunnelEvent({ userId: user.id, event: "checkout_started", referralPartnerId: linkedReferralId ? referral!.partnerId : null, meta: { termMonths, planCode: plan.code } });
 
+  const userUpdates: Record<string, unknown> = {};
   if (parsed.data.gstin || stateCode !== user.billingStateCode) {
-    await db.user.update({
-      where: { id: user.id },
-      data: {
-        gstin: parsed.data.gstin || user.gstin,
-        billingStateCode: stateCode,
-        onboardingStep: user.onboardingStep === "IDENTIFIED" || user.onboardingStep === "PROFILED" ? "PLAN_SELECTED" : undefined,
-      },
-    });
+    userUpdates.gstin = parsed.data.gstin || user.gstin;
+    userUpdates.billingStateCode = stateCode;
+  }
+  if (!user.email) userUpdates.email = parsed.data.invoiceEmail;
+  if (user.onboardingStep === "IDENTIFIED" || user.onboardingStep === "PROFILED") userUpdates.onboardingStep = "PLAN_SELECTED";
+  if (Object.keys(userUpdates).length > 0) {
+    await db.user.update({ where: { id: user.id }, data: userUpdates });
   }
 
   try {
@@ -128,14 +164,14 @@ checkoutRouter.post("/", async (req, res) => {
       idempotencyKey: order.idempotencyKey,
       customer: {
         id: user.id,
-        email: user.email ?? "",
+        email: parsed.data.invoiceEmail,
         phone: user.phone ?? "",
-        name: user.fullName ?? user.email ?? "Customer",
+        name: user.fullName ?? parsed.data.invoiceEmail,
       },
       returnUrl: `${config.appUrl}/checkout/return?order_id={order_id}`,
       notifyUrl: `${config.apiPublicUrl}/api/webhooks/cashfree`,
       expiresAt: order.expiresAt.toISOString(),
-      note: `${plan.name} · ${parsed.data.termMonths} months`,
+      note: `${plan.name} · ${termMonths} months`,
     });
 
     await db.order.update({
@@ -148,6 +184,8 @@ checkoutRouter.post("/", async (req, res) => {
       orderId: order.id,
       cashfreeMode: config.cashfree.env,
       subtotalPaise: Number(order.subtotalPaise),
+      discountPercent: order.discountPercent,
+      savingsPaise: Number(order.savingsPaise),
       cgstPaise: Number(order.cgstPaise),
       sgstPaise: Number(order.sgstPaise),
       igstPaise: Number(order.igstPaise),
@@ -176,27 +214,23 @@ checkoutRouter.get("/quote", async (req, res) => {
     return;
   }
 
-  const [plan, cfg] = await Promise.all([
-    db.plan.findUnique({ where: { code: parsed.data.planCode } }),
-    db.launchConfig.findUnique({ where: { id: 1 } }),
-  ]);
-  if (!plan?.isActive || !cfg) {
+  const plan = await db.plan.findUnique({ where: { code: parsed.data.planCode } });
+  if (!plan?.isActive) {
     res.status(400).json({ error: "checkout_unavailable" });
     return;
   }
 
-  const sold = await db.order.count({ where: { isEarlyBird: true, status: "PAID" } });
-  const early = isEarlyBirdOpen(new Date(), cfg, sold);
-  const ratePaise = effectiveRatePaise(plan, parsed.data.termMonths, early);
-  const subtotal = ratePaise * BigInt(parsed.data.termMonths);
+  const termMonths = parsed.data.termMonths as TermMonths;
+  const pricing = computeTermPricing(plan.normalPaiseMonth, termMonths);
 
   const stateCode =
     parsed.data.gstin && GSTIN_RE.test(parsed.data.gstin) ? stateFromGstin(parsed.data.gstin) : parsed.data.stateCode;
-  const g = computeGst(subtotal, stateCode, config.supplierStateCode);
+  const g = computeGst(pricing.subtotalPaise, stateCode, config.supplierStateCode);
 
   res.json({
-    isEarlyBird: ratePaise === plan.earlyPaiseMonth,
-    ratePaiseMonth: Number(ratePaise),
+    discountPercent: pricing.discountPercent,
+    ratePaiseMonth: Number(pricing.monthlyRatePaise),
+    savingsPaise: Number(pricing.savingsPaise),
     subtotalPaise: Number(g.netPaise),
     cgstPaise: Number(g.cgstPaise),
     sgstPaise: Number(g.sgstPaise),
@@ -207,7 +241,44 @@ checkoutRouter.get("/quote", async (req, res) => {
   });
 });
 
+// userchanges.md C-7 — live-validate a typed referral code without
+// attaching it. Attachment still only happens at POST / via attributeReferral.
+checkoutRouter.get("/referral", async (req, res) => {
+  const code = typeof req.query.code === "string" ? req.query.code : "";
+  if (!code.trim()) {
+    res.json({ valid: false });
+    return;
+  }
+  const partner = await resolveActivePartnerByCode(code);
+  res.json({ valid: Boolean(partner) });
+});
+
 export const ordersRouter = Router();
+
+// userchanges.md X-5 — the Billing page's order list.
+ordersRouter.get("/", async (req, res) => {
+  const session = await readSession(req);
+  if (!session) {
+    res.status(401).json({ error: "not_authenticated" });
+    return;
+  }
+  const orders = await db.order.findMany({
+    where: { userId: session.sub },
+    include: { plan: true },
+    orderBy: { createdAt: "desc" },
+  });
+  res.json({
+    orders: orders.map((o) => ({
+      id: o.id,
+      planName: o.plan.name,
+      termMonths: o.termMonths,
+      status: o.status,
+      totalPaise: Number(o.totalPaise),
+      createdAt: o.createdAt.toISOString(),
+      paidAt: o.paidAt?.toISOString() ?? null,
+    })),
+  });
+});
 
 ordersRouter.get("/:id", async (req, res) => {
   const session = await readSession(req);
@@ -239,13 +310,34 @@ ordersRouter.get("/:id", async (req, res) => {
     status: order.status,
     planCode: order.planCode,
     termMonths: order.termMonths,
+    discountPercent: order.discountPercent,
     subtotalPaise: Number(order.subtotalPaise),
+    savingsPaise: Number(order.savingsPaise),
     cgstPaise: Number(order.cgstPaise),
     sgstPaise: Number(order.sgstPaise),
     igstPaise: Number(order.igstPaise),
     totalPaise: Number(order.totalPaise),
-    isEarlyBird: order.isEarlyBird,
+    invoiceEmail: order.invoiceEmail,
   });
+});
+
+// userchanges.md X-5 — GST invoice PDF, built only from the stored Order
+// columns (never recomputed) so it always matches the quote/order/admin totals.
+ordersRouter.get("/:id/invoice", async (req, res) => {
+  const session = await readSession(req);
+  if (!session) {
+    res.status(401).json({ error: "not_authenticated" });
+    return;
+  }
+  const order = await db.order.findUnique({ where: { id: req.params.id }, include: { plan: true, user: true } });
+  if (!order || order.userId !== session.sub || order.status !== "PAID") {
+    res.status(404).json({ error: "not_found" });
+    return;
+  }
+
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", `attachment; filename="dorway-invoice-${order.id.slice(0, 8)}.pdf"`);
+  renderInvoicePdf(order).pipe(res);
 });
 
 export const webhookRouter = Router();
@@ -332,6 +424,8 @@ export async function processWebhookEvent(evt: any) {
 
       // partners.md §7.2/§7.3: commission on the referred account's FIRST paid
       // order only (§12.2 open decision — this is the doc's stated default).
+      // userchanges.md P-4: the base is the post-discount subtotal, excluding
+      // GST — not the GST-inclusive total.
       if (order.referralId) {
         const priorPaidOrders = await tx.order.count({ where: { userId: order.userId, status: "PAID" } });
         if (priorPaidOrders === 0) {
@@ -339,7 +433,7 @@ export async function processWebhookEvent(evt: any) {
           if (referral && referral.status === "signed_up") {
             const paidAt = new Date();
             const holdUntil = new Date(paidAt.getTime() + PARTNER_PROGRAM.holdDays * 86_400_000);
-            const amount = BigInt(Math.floor(Number(order.totalPaise) * PARTNER_PROGRAM.commissionRate));
+            const amount = BigInt(Math.floor(Number(order.subtotalPaise) * PARTNER_PROGRAM.commissionRate));
             await tx.commission.create({
               data: { partnerId: referral.partnerId, orderId: order.id, amount, status: "on_hold", paidAt, holdUntil },
             });
@@ -352,6 +446,7 @@ export async function processWebhookEvent(evt: any) {
       await tx.order.update({ where: { id: order.id }, data: { status: "PAID", paidAt: new Date() } });
       await tx.user.update({ where: { id: order.userId }, data: { onboardingStep: "PAID" } });
       await logOnboardingEvent(order.userId, "PAID", undefined, tx);
+      await tx.funnelEvent.create({ data: { userId: order.userId, event: "paid", meta: { orderId: order.id, totalPaise: order.totalPaise.toString() } as never } });
 
       const cfg = await tx.launchConfig.findUnique({ where: { id: 1 } });
       const starts = cfg?.launchAt ?? new Date();
@@ -365,14 +460,16 @@ export async function processWebhookEvent(evt: any) {
           accessStartsAt: starts,
           accessEndsAt: addMonths(starts, order.termMonths),
           status: "PENDING_LAUNCH",
+          approvalStatus: "PENDING_REVIEW",
         },
       });
     });
 
     const order = await db.order.findUnique({ where: { id: orderId }, include: { user: true, plan: true } });
-    if (order?.user.email) {
+    const invoiceEmail = order?.invoiceEmail ?? order?.user.email;
+    if (order && invoiceEmail) {
       await sendReceiptEmail(
-        order.user.email,
+        invoiceEmail,
         `${order.plan.name} · ${order.termMonths} months · ₹${(Number(order.totalPaise) / 100).toFixed(2)} paid.`,
       );
     }

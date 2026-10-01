@@ -646,14 +646,16 @@ function Avatar({ name, i = 0, size }) {
 }
 
 /** Doorway mark: an arch with an opening. Used in logo, app mockups, radial core. */
-function Mark({ size = 36, dark = true }) {
+function Mark({ size = 36, dark = true, accent = true }) {
   const bg = dark ? "#12211C" : "#FFFFFF";
   const fg = dark ? "#FFFFFF" : "#12211C";
   return (
     <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden="true">
       <rect width="40" height="40" rx="11" fill={bg} />
       <path d="M12 31V19a8 8 0 0 1 16 0v12" fill="none" stroke={fg} strokeWidth="3.4" strokeLinecap="round" />
-      <path d="M17.5 31v-9.5a2.5 2.5 0 0 1 5 0V31" fill="none" stroke="#5FD3A1" strokeWidth="3.4" strokeLinecap="round" />
+      {accent && (
+        <path d="M17.5 31v-9.5a2.5 2.5 0 0 1 5 0V31" fill="none" stroke="#5FD3A1" strokeWidth="3.4" strokeLinecap="round" />
+      )}
     </svg>
   );
 }
@@ -661,7 +663,7 @@ function Mark({ size = 36, dark = true }) {
 function Logo() {
   return (
     <a href="#top" className="dw-logo" aria-label={`${CONFIG.brand} home`}>
-      <Mark size={38} />
+      <Mark size={38} accent={false} />
       <span>{CONFIG.brand.toLowerCase()}</span>
     </a>
   );

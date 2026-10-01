@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../../../lib/api";
 import { useAdminRange, formatMoney, formatPct } from "../../../lib/adminApi";
+import { adminHref } from "../../../lib/adminHost";
 import { KpiRow } from "../components/Kpi";
 
 interface HomeData {
   kpis: Record<string, { value: number; previousValue: number; pctChange: number | null; pctOfTotal?: number }>;
   dailyTrend: { date: string; signups: number; onboardingCompleted: number; newPaying: number }[];
   revenueByPlan: { plan: string; amount: number }[];
-  needsAttention: { payoutsOverSla: number; openFraudFlags: number; webhookFailures24h: number; reconciliationMissingInGateway: number; reconciliationMissingInDorway: number };
+  needsAttention: { payoutsOverSla: number; openFraudFlags: number; webhookFailures24h: number; reconciliationMissingInGateway: number; reconciliationMissingInDorway: number; approvalWaiting: number };
 }
 
 export function Home() {
@@ -22,6 +23,7 @@ export function Home() {
   if (!data) return <p className="admin-sub">Loading…</p>;
 
   const attention = [
+    { label: "Accounts waiting more than 1 working day for approval", value: data.needsAttention.approvalWaiting, to: "/onboarding/approvals" },
     { label: "Payouts waiting more than 3 working days", value: data.needsAttention.payoutsOverSla, to: "/affiliates/payouts" },
     { label: "Open fraud flags", value: data.needsAttention.openFraudFlags, to: "/affiliates/flags" },
     { label: "Payment webhook failures in last 24h", value: data.needsAttention.webhookFailures24h, to: "/purchases/reconciliation" },
@@ -79,7 +81,7 @@ export function Home() {
         {attention.length === 0 && <p className="admin-sub" style={{ margin: 0 }}>Nothing needs attention right now.</p>}
         {attention.map((a) => (
           <div key={a.label} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--a-line)" }}>
-            <Link to={a.to} className="admin-link-btn">{a.label}</Link>
+            <Link to={adminHref(a.to)} className="admin-link-btn">{a.label}</Link>
             <span className="admin-badge amber">{a.value}</span>
           </div>
         ))}

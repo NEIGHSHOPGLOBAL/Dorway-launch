@@ -205,7 +205,7 @@ adminAffiliatesRouter.get("/partners/:id", async (req, res) => {
   const partner = await db.partner.findUnique({ where: { id: req.params.id }, include: { payoutMethod: true } });
   if (!partner) return res.status(404).json({ error: { code: "NOT_FOUND", message: "Partner not found." } });
 
-  const [commissions, bonuses, payouts, referralEvents, referrals, notes, flags] = await Promise.all([
+  const [commissions, bonuses, payouts, referralEvents, referrals, notes, flags, clickCount] = await Promise.all([
     db.commission.findMany({ where: { partnerId: partner.id }, orderBy: { paidAt: "desc" } }),
     db.bonus.findMany({ where: { partnerId: partner.id }, orderBy: { earnedAt: "desc" } }),
     db.partnerPayout.findMany({ where: { partnerId: partner.id }, orderBy: { requestedAt: "desc" } }),
@@ -213,6 +213,7 @@ adminAffiliatesRouter.get("/partners/:id", async (req, res) => {
     db.referral.findMany({ where: { partnerId: partner.id }, include: { account: { select: { businessName: true, fullName: true } } } }),
     db.adminNote.findMany({ where: { entityType: "partner", entityId: partner.id }, orderBy: { createdAt: "desc" } }),
     db.fraudFlag.findMany({ where: { partnerId: partner.id }, orderBy: { createdAt: "desc" } }),
+    db.referralEvent.count({ where: { partnerId: partner.id, type: "link_opened" } }),
   ]);
 
   const onHold = sumBigint(commissions.filter((c) => c.status === "on_hold")) + sumBigint(bonuses.filter((b) => b.status === "on_hold"));
@@ -250,6 +251,12 @@ adminAffiliatesRouter.get("/partners/:id", async (req, res) => {
       isTest: partner.isTest,
     },
     balances: { onHold: Number(onHold), approved: Number(approved), inProcess: Number(inProcess), paid: Number(paid), reversed: Number(reversed) },
+    summary: {
+      clicks: clickCount,
+      signups: referrals.length,
+      paidCustomers: referrals.filter((r) => r.status === "converted").length,
+      openFlags: flags.filter((f) => f.status === "open").length,
+    },
     payoutMethod: serializeMethod(partner.payoutMethod),
     activity: referralEvents,
     referrals: referrals.map((r) => ({ id: r.id, accountId: r.accountId, businessMasked: maskBusinessName(r.account.businessName ?? r.account.fullName), attributedVia: r.attributedVia, attributedAt: r.attributedAt, status: r.status, rejectionReason: r.rejectionReason })),

@@ -1,0 +1,106 @@
+{
+  "businessNumber": "+91 80XXX 20115",
+  "conversations": [
+    {
+      "id": "neha-sharma",
+      "name": "Neha Sharma",
+      "preview": "Can someone visit this Saturday?",
+      "owner": "Priya",
+      "stage": "Site visit",
+      "chip": "amber",
+      "time": "7:51 PM",
+      "unread": true,
+      "avatarIndex": 1,
+      "nextFollowUp": "Sat, 11:00 AM — site visit",
+      "thread": [
+        { "from": "lead", "text": "Hi, I saw your ad for modular kitchens. Can you share some designs?", "time": "Mon, 10:02 AM" },
+        { "from": "us", "author": "Priya", "text": "Hi Neha! Sure, sharing our 2BHK modular kitchen catalogue now. Starting price is ₹1.8L.", "time": "Mon, 10:14 AM" },
+        { "from": "lead", "text": "These look great. Can someone visit this Saturday?", "time": "7:51 PM" }
+      ]
+    },
+    {
+      "id": "vikram-joshi",
+      "name": "Vikram Joshi",
+      "preview": "Please share the 3BHK quotation",
+      "owner": "Arjun",
+      "stage": "Quoted",
+      "chip": "grey",
+      "time": "7:30 PM",
+      "unread": true,
+      "avatarIndex": 2,
+      "nextFollowUp": "Overdue — quote sent 2 days ago, no reply",
+      "thread": [
+        { "from": "lead", "text": "Please share the 3BHK quotation we discussed.", "time": "2 days ago" },
+        { "from": "us", "author": "Arjun", "text": "Sending it across now — let me know if you have questions.", "time": "2 days ago" }
+      ]
+    },
+    {
+      "id": "farah-khan",
+      "name": "Farah Khan",
+      "preview": "Thanks, will discuss with family",
+      "owner": "Priya",
+      "stage": "Negotiating",
+      "chip": "green",
+      "time": "6:12 PM",
+      "unread": false,
+      "avatarIndex": 3,
+      "nextFollowUp": "Tomorrow, 4:00 PM — check-in call",
+      "thread": [
+        { "from": "us", "author": "Priya", "text": "Here's the revised quote for the kitchen — ₹2.4L including fittings.", "time": "6:00 PM" },
+        { "from": "lead", "text": "Thanks, will discuss with family and get back to you.", "time": "6:12 PM" }
+      ]
+    },
+    {
+      "id": "suresh-menon",
+      "name": "Suresh Menon",
+      "preview": "Is the offer still valid?",
+      "owner": "Rahul",
+      "stage": "Interested",
+      "chip": "green",
+      "time": "Yesterday",
+      "unread": false,
+      "avatarIndex": 4,
+      "nextFollowUp": "Today — reply about offer validity",
+      "thread": [
+        { "from": "lead", "text": "Is the festive offer still valid this week?", "time": "Yesterday" }
+      ]
+    }
+  ],
+  "followUps": [
+    { "lead": "Vikram Joshi", "owner": "Arjun", "detail": "Quote sent 2 days ago, no reply", "due": "Overdue" },
+    { "lead": "Suresh Menon", "owner": "Rahul", "detail": "Asked if the offer is still valid", "due": "Today" },
+    { "lead": "Kavya Rao", "owner": "Priya", "detail": "Requested a callback", "due": "Today" },
+    { "lead": "Imran Sheikh", "owner": null, "detail": "Unassigned — no owner yet", "due": "Today" }
+  ],
+  "pipeline": {
+    "stages": [
+      { "name": "New", "count": 3 },
+      { "name": "Quoted", "count": 2 },
+      { "name": "Site visit", "count": 1 },
+      { "name": "Negotiating", "count": 1 },
+      { "name": "Won", "count": 1 }
+    ]
+  },
+  "askDorway": [
+    {
+      "q": "Which leads haven't been followed up today?",
+      "a": "4 leads are due today with no follow-up yet: Vikram Joshi (Arjun) — quote sent 2 days ago, no reply. Suresh Menon (Rahul) — asked if the offer is still valid. Kavya Rao (Priya) — requested a callback. Imran Sheikh — unassigned."
+    },
+    {
+      "q": "Show me prospects asking about pricing.",
+      "a": "9 conversations this week mention price, budget or quotation. 6 have an owner and a follow-up scheduled. 3 don't: Vikram Joshi, Deepa Iyer and Imran Sheikh."
+    },
+    {
+      "q": "Which conversations look ready for a call?",
+      "a": "Farah Khan and Neha Sharma. Both have confirmed budget, asked about timelines and replied within an hour of the last message."
+    },
+    {
+      "q": "Summarise what happened with this lead.",
+      "a": "Neha Sharma came in from a Click-to-WhatsApp ad on Monday asking about a 2BHK modular kitchen. Priya shared the catalogue and ₹1.8L starting price. A site visit is booked for Saturday, 11 AM."
+    },
+    {
+      "q": "Which salesperson has untouched leads?",
+      "a": "Arjun has 2 untouched leads from this afternoon. Everyone else has replied to all new enquiries."
+    }
+  ]
+}

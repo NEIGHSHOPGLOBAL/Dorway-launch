@@ -1,36 +1,20 @@
+import { randomInt } from "node:crypto";
 import { db } from "./db.js";
 
-// partners.md §6: five words, lowercase, hyphen-joined, no repeated word.
-// Short list for now — expand to 1,000+ unambiguous words before launch so
-// the collision rate stays low at scale (see README TODO).
-const WORDS = [
-  "amber", "anchor", "aspen", "basil", "birch", "bloom", "brook", "cedar", "chai", "cider",
-  "clove", "coral", "cove", "crest", "dawn", "delta", "dune", "ember", "fern", "field",
-  "flint", "frost", "glade", "grove", "harbor", "hazel", "honey", "indigo", "ivory", "jade",
-  "juniper", "kite", "lagoon", "lark", "lemon", "lotus", "maple", "marble", "meadow", "mint",
-  "monsoon", "moss", "nectar", "noon", "north", "oak", "olive", "opal", "orbit", "orchid",
-  "palm", "pebble", "pepper", "pine", "plum", "quartz", "rain", "reed", "ridge", "river",
-  "rose", "saffron", "sage", "shore", "sierra", "slate", "solar", "spark", "spruce", "stone",
-  "summit", "tamarind", "teal", "thyme", "tide", "tulip", "valley", "velvet", "willow", "wind", "zest",
-];
+// 5-character alphanumeric codes. Ambiguous glyphs (0/O, 1/I) are left out
+// so a code can be read aloud on a call.
+const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const CODE_LENGTH = 5;
 
 function randomCode(): string {
-  const picked: string[] = [];
-  while (picked.length < 5) {
-    const w = WORDS[Math.floor(Math.random() * WORDS.length)];
-    if (!picked.includes(w)) picked.push(w);
-  }
-  return picked.join("-");
+  let code = "";
+  for (let i = 0; i < CODE_LENGTH; i++) code += ALPHABET[randomInt(ALPHABET.length)];
+  return code;
 }
 
-/** Lowercase, trim, collapse separators to '-' — so pasted/typed variants still match. */
+/** Uppercase and keep only letters and digits, so "k7 mq2" and "K7MQ2" match. */
 export function normalizeCode(raw: string): string {
-  return raw
-    .trim()
-    .toLowerCase()
-    .replace(/[\s._]+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
+  return raw.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
 }
 
 export async function generateUniquePartnerCode(): Promise<string> {

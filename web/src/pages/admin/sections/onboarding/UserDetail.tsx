@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { api } from "../../../../lib/api";
 import { formatMoney, formatDateTime } from "../../../../lib/adminApi";
+import { adminHref } from "../../../../lib/adminHost";
 import { ReasonModal } from "../../components/ReasonModal";
 
 interface UserDetailData {
@@ -41,7 +42,7 @@ export function UserDetail() {
 
   return (
     <div>
-      <Link to="/onboarding/users" className="admin-link-btn">← Users</Link>
+      <Link to={adminHref("/onboarding/users")} className="admin-link-btn">← Users</Link>
       <h2 className="admin-h2" style={{ marginTop: 10 }}>{data.businessName}</h2>
       <p className="admin-sub">
         <span className="admin-reveal" onClick={() => reveal("phone")}>{revealed.phone ?? data.phoneMasked ?? "—"}</span>
@@ -73,7 +74,7 @@ export function UserDetail() {
             <h3>Referral</h3>
             {data.referral ? (
               <p style={{ fontSize: 13.5, margin: 0 }}>
-                Via <Link to={`/affiliates/partners/${data.referral.partnerId}`} className="admin-link-btn">{data.referral.partnerName} ({data.referral.partnerCode})</Link>
+                Via <Link to={adminHref(`/affiliates/partners/${data.referral.partnerId}`)} className="admin-link-btn">{data.referral.partnerName} ({data.referral.partnerCode})</Link>
                 {" · "}{data.referral.via} · {formatDateTime(data.referral.at)} · <span className="admin-badge blue">{data.referral.status}</span>
               </p>
             ) : (

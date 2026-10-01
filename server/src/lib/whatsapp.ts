@@ -44,6 +44,44 @@ export async function sendOtpWhatsApp(toE164: string, code: string) {
   return (await res.json()) as { messages?: { id: string }[] };
 }
 
+/**
+ * userchanges.md §8.5 — generic sender for the post-purchase utility
+ * templates (paid/approved/setup_scheduled/rejected). These aren't
+ * Meta-approved in this environment yet, so — like sendOtpEmail in
+ * lib/email.ts — this falls back to a console log when WhatsApp isn't
+ * configured, rather than failing the admin action that triggers it.
+ */
+export async function sendUtilityTemplate(toE164: string, templateName: string, bodyParams: string[]) {
+  if (!config.whatsapp.isConfigured) {
+    console.log(`\n[dev whatsapp] template "${templateName}" to ${toE164}: ${bodyParams.join(" | ")}\n`);
+    return;
+  }
+
+  const url = `https://graph.facebook.com/${config.whatsapp.apiVersion}/${config.whatsapp.phoneNumberId}/messages`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${config.whatsapp.accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to: toE164,
+      type: "template",
+      template: {
+        name: templateName,
+        language: { code: "en" },
+        components: [{ type: "body", parameters: bodyParams.map((text) => ({ type: "text", text })) }],
+      },
+    }),
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    console.error(`WhatsApp utility template "${templateName}" send failed: ${res.status} ${body}`);
+  }
+}
+
 export function verifyWhatsAppSignature(rawBody: Buffer, signatureHeader: string | undefined): boolean {
   if (!signatureHeader || !config.whatsapp.appSecret) return false;
   const expected =

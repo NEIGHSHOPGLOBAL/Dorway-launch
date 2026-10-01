@@ -9,6 +9,20 @@ interface FunnelData {
   breakdown: { group: string; steps: FunnelStep[] }[] | null;
 }
 interface CohortData { steps: string[]; windows: number[]; rows: { week: string; size: number; cells: Record<string, number> }[] }
+interface ConversionFunnelData { steps: { step: string; count: number }[] }
+interface PaywallTriggerData { triggers: { trigger: string; count: number }[] }
+
+const CONVERSION_STEP_LABEL: Record<string, string> = {
+  profile_completed: "Profile completed",
+  preview_viewed: "Preview viewed",
+  paywall_opened: "Paywall opened",
+  checkout_started: "Checkout started",
+  paid: "Paid",
+  approved: "Approved",
+  setup_scheduled: "Setup scheduled",
+  setup_submitted: "Setup submitted",
+  live: "Live",
+};
 
 function fmtHours(h: number | null): string {
   if (h === null) return "—";
@@ -21,6 +35,8 @@ export function Funnel() {
   const [data, setData] = useState<FunnelData | null>(null);
   const [cohorts, setCohorts] = useState<CohortData | null>(null);
   const [breakdown, setBreakdown] = useState<string>("");
+  const [conversion, setConversion] = useState<ConversionFunnelData | null>(null);
+  const [triggers, setTriggers] = useState<PaywallTriggerData | null>(null);
 
   useEffect(() => {
     api.get<FunnelData>(`/admin/metrics/onboarding/funnel${range.query({ breakdown: breakdown || undefined })}`).then(setData);
@@ -29,6 +45,11 @@ export function Funnel() {
   useEffect(() => {
     api.get<CohortData>(`/admin/metrics/onboarding/cohorts${range.query()}`).then(setCohorts);
   }, [range.from, range.to, range.includeTest]);
+
+  useEffect(() => {
+    api.get<ConversionFunnelData>(`/admin/metrics/conversion-funnel${range.query()}`).then(setConversion);
+    api.get<PaywallTriggerData>(`/admin/metrics/paywall-triggers${range.query()}`).then(setTriggers);
+  }, [range.from, range.to]);
 
   return (
     <div>
@@ -91,6 +112,34 @@ export function Funnel() {
             <thead><tr><th>From</th><th>To</th><th>Median</th></tr></thead>
             <tbody>
               {data?.medianTimes.map((m) => <tr key={`${m.from}-${m.to}`}><td>{m.from}</td><td>{m.to}</td><td>{fmtHours(m.medianHours)}</td></tr>)}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="admin-card">
+        <h3>Preview → paid conversion funnel</h3>
+        <p className="admin-sub" style={{ marginTop: -8 }}>userchanges.md AD-4 — distinct accounts reaching each step in the preview/paywall/approval journey.</p>
+        <div className="admin-table-wrap">
+          <table className="admin-table">
+            <thead><tr><th>Step</th><th>Accounts</th></tr></thead>
+            <tbody>
+              {conversion?.steps.map((s) => <tr key={s.step}><td>{CONVERSION_STEP_LABEL[s.step] ?? s.step}</td><td>{s.count}</td></tr>)}
+              {!conversion && <tr><td colSpan={2} className="admin-empty">Loading…</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="admin-card">
+        <h3>Paywall trigger breakdown</h3>
+        <p className="admin-sub" style={{ marginTop: -8 }}>§9 — which locked action opens the paywall most.</p>
+        <div className="admin-table-wrap">
+          <table className="admin-table">
+            <thead><tr><th>Trigger</th><th>Opens</th></tr></thead>
+            <tbody>
+              {triggers?.triggers.map((t) => <tr key={t.trigger}><td>{t.trigger}</td><td>{t.count}</td></tr>)}
+              {triggers && triggers.triggers.length === 0 && <tr><td colSpan={2} className="admin-empty">No paywall opens in this range.</td></tr>}
             </tbody>
           </table>
         </div>

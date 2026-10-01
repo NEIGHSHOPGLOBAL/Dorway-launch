@@ -8,16 +8,17 @@ import { Layout } from "./components/Layout";
 import DorwayLanding from "./pages/DorwayLanding.jsx";
 import DorwayPartners from "./pages/partners/DorwayPartners.jsx";
 import { Login } from "./pages/Login";
+import { Welcome } from "./pages/Welcome";
 import { Pricing } from "./pages/Pricing";
 import { Checkout } from "./pages/Checkout";
 import { CheckoutReturn } from "./pages/CheckoutReturn";
 import { Dashboard } from "./pages/Dashboard";
-import { OnboardingProfile } from "./pages/onboarding/Profile";
+import { Billing } from "./pages/Billing";
 import { OnboardingSetup } from "./pages/onboarding/Setup";
 import { TermsPage, PrivacyPage, RefundPage } from "./pages/Legal";
 import { Contact } from "./pages/Contact";
 import { AdminLogin } from "./pages/admin/AdminLogin";
-import { AdminDashboard } from "./pages/admin/AdminDashboard";
+import { AdminApp } from "./pages/admin/AdminApp";
 
 function PixelPageView() {
   const location = useLocation();
@@ -51,8 +52,7 @@ export function App() {
         <PixelPageView />
         <Routes>
           <Route path="/login" element={<AdminLogin />} />
-          <Route path="/" element={<AdminDashboard />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/*" element={<AdminApp />} />
         </Routes>
       </BrowserRouter>
     );
@@ -66,13 +66,14 @@ export function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/welcome" element={<Welcome />} />
           <Route
             path="/admin/login"
             element={sendAdminToSubdomain ? <RedirectToAdminHost path="/login" /> : <AdminLogin />}
           />
           <Route
-            path="/admin"
-            element={sendAdminToSubdomain ? <RedirectToAdminHost path="/" /> : <AdminDashboard />}
+            path="/admin/*"
+            element={sendAdminToSubdomain ? <RedirectToAdminHost path="/" /> : <AdminApp />}
           />
           <Route path="/" element={<DorwayLanding />} />
           <Route path="/partners/*" element={<DorwayPartners />} />
@@ -81,8 +82,9 @@ export function App() {
             <Route path="/checkout/:planCode" element={<Checkout />} />
             <Route path="/checkout/return" element={<CheckoutReturn />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/billing" element={<Billing />} />
             <Route path="/account" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/onboarding/profile" element={<OnboardingProfile />} />
+            <Route path="/onboarding/profile" element={<Navigate to="/welcome" replace />} />
             <Route path="/onboarding/setup" element={<OnboardingSetup />} />
             <Route path="/legal/terms" element={<TermsPage />} />
             <Route path="/legal/privacy" element={<PrivacyPage />} />

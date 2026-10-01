@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { PricingCards } from "../components/PricingCards";
+import { WhatsAppHelpButton } from "../components/WhatsAppHelpButton";
 
 interface LaunchState {
   serverTime: string;
@@ -46,10 +47,9 @@ export function Pricing() {
     <>
       <section className="page-hero">
         <div className="container">
-          <h1>Simple pricing, per business</h1>
+          <h1>One plan. Everything your team needs.</h1>
           <p className="lead" style={{ maxWidth: 560, margin: "0 auto" }}>
-            Simple per-business pricing. Add people as your team grows. Meta's per-conversation charges sit outside
-            the subscription — you pay Meta directly, at their rates.
+            Pick how long. Longer terms cost less per month.
           </p>
 
           {launchState?.phase === "PRE_LAUNCH" && remaining !== null && (
@@ -68,6 +68,7 @@ export function Pricing() {
           <PricingCards />
         </div>
       </section>
+      <WhatsAppHelpButton page="pricing" />
     </>
   );
 }

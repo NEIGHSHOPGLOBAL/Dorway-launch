@@ -36,6 +36,9 @@ model User {
   onboardingUpdatedAt  DateTime       @default(now()) @updatedAt @map("onboarding_updated_at")
   createdAt            DateTime       @default(now()) @map("created_at")
   lastLoginAt          DateTime?      @map("last_login_at")
+  // userchanges.md L-5 — consent to Terms/Privacy + WhatsApp account messages,
+  // captured once at first signup.
+  consentAt            DateTime?      @map("consent_at")
 
   // superadmin.md §1.2, §12 — excluded from every metric unless the
   // "include test accounts" toggle is on.
@@ -53,8 +56,33 @@ model User {
   onboardingDocuments OnboardingDocument[]
   referral           Referral?
   onboardingEvents   OnboardingEvent[]
+  funnelEvents       FunnelEvent[]
 
   @@map("users")
+}
+
+// userchanges.md §9 — a separate, append-*every-time* event stream for UI
+// funnel events (PREVIEW_VIEWED, PAYWALL_OPENED, TERM_SELECTED, ...).
+// OnboardingEvent above is first-occurrence-per-step and already drives the
+// admin account-progress funnel — this is additive, not a replacement.
+model FunnelEvent {
+  id                String   @id @default(uuid())
+  userId            String?  @map("user_id")
+  sessionId         String?  @map("session_id")
+  event             String
+  meta              Json?
+  referralPartnerId String?  @map("referral_partner_id")
+  utmSource         String?  @map("utm_source")
+  utmMedium         String?  @map("utm_medium")
+  utmCampaign       String?  @map("utm_campaign")
+  device            String?
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([event, createdAt])
+  @@index([userId, event])
+  @@map("funnel_events")
 }
 
 // superadmin.md §5.1/§12 — append-only, first occurrence per step, powers
@@ -140,6 +168,12 @@ model Order {
   planCode              String      @map("plan_code")
   termMonths            Int         @map("term_months")
   isEarlyBird           Boolean     @map("is_early_bird")
+  // userchanges.md P-3 — the term-discount rate actually applied, stored so
+  // invoices/admin never recompute pricing history after the rate changes.
+  discountPercent       Int         @default(0) @map("discount_percent")
+  savingsPaise          BigInt      @default(0) @map("savings_paise")
+  // userchanges.md C-2 — "email for invoice", required at checkout.
+  invoiceEmail          String?     @map("invoice_email")
   ratePaiseMonth        BigInt      @map("rate_paise_month")
   subtotalPaise         BigInt      @map("subtotal_paise")
   cgstPaise             BigInt      @default(0) @map("cgst_paise")
@@ -210,24 +244,42 @@ enum EntitlementStatus {
   CANCELLED
 }
 
+// userchanges.md §8.1 — admin approval layer on top of payment. The webhook
+// (Order/Entitlement creation) stays the source of truth for payment; this
+// is a separate state the admin console advances.
+enum ApprovalStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+}
+
 model Entitlement {
-  id              String            @id @default(uuid())
-  userId          String            @map("user_id")
-  orderId         String            @unique @map("order_id")
-  planCode        String            @map("plan_code")
-  ratePaiseMonth  BigInt            @map("rate_paise_month")
-  termMonths      Int               @map("term_months")
-  accessStartsAt  DateTime          @map("access_starts_at")
-  accessEndsAt    DateTime          @map("access_ends_at")
-  status          EntitlementStatus @default(PENDING_LAUNCH)
-  crmTenantId     String?           @map("crm_tenant_id")
-  provisionedAt   DateTime?         @map("provisioned_at")
-  createdAt       DateTime          @default(now()) @map("created_at")
+  id               String            @id @default(uuid())
+  userId           String            @map("user_id")
+  orderId          String            @unique @map("order_id")
+  planCode         String            @map("plan_code")
+  ratePaiseMonth   BigInt            @map("rate_paise_month")
+  termMonths       Int               @map("term_months")
+  accessStartsAt   DateTime          @map("access_starts_at")
+  accessEndsAt     DateTime          @map("access_ends_at")
+  status           EntitlementStatus @default(PENDING_LAUNCH)
+  crmTenantId      String?           @map("crm_tenant_id")
+  provisionedAt    DateTime?         @map("provisioned_at")
+  createdAt        DateTime          @default(now()) @map("created_at")
+
+  approvalStatus   ApprovalStatus    @default(PENDING_REVIEW) @map("approval_status")
+  approvedAt       DateTime?         @map("approved_at")
+  approvedBy       String?           @map("approved_by")
+  rejectionReason  String?           @map("rejection_reason")
+  setupOwnerName   String?           @map("setup_owner_name")
+  setupOwnerPhone  String?           @map("setup_owner_phone")
+  setupCallAt      DateTime?         @map("setup_call_at")
 
   user  User  @relation(fields: [userId], references: [id])
   order Order @relation(fields: [orderId], references: [id])
   plan  Plan  @relation(fields: [planCode], references: [code])
 
+  @@index([approvalStatus, createdAt])
   @@map("entitlements")
 }
 
@@ -253,6 +305,10 @@ model OnboardingProfile {
   waOnConsumerApp      Boolean?  @map("wa_on_consumer_app")
   waCurrentPlatform    String?   @map("wa_current_platform")
   waOtpReachable       String?   @map("wa_otp_reachable")
+
+  // userchanges.md W-4 — "how many people reply to customers on WhatsApp?",
+  // captured on /welcome. Personalises preview copy and is an admin segment.
+  teamSize             String?   @map("team_size")
 
   // B: business
   legalName           String?   @map("legal_name")

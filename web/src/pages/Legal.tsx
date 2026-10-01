@@ -77,7 +77,7 @@ export function RefundPage() {
         <h2>The promise</h2>
         <p>
           Full refund, no questions asked, any time before launch and up to 7 days after launch. Request it by
-          emailing support with your order ID.
+          emailing <a href="mailto:hello@dorwayai.com" style={{ color: "var(--green)" }}>hello@dorwayai.com</a> with your order ID.
         </p>
 
         <h2>How refunds are processed</h2>

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -26,9 +26,8 @@
     <link rel="dns-prefetch" href="https://www.facebook.com" />
     <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&family=Caveat:wght@600&display=swap" rel="stylesheet" />
 
-    <!-- Cashfree hosted-checkout SDK — loaded even before keys are configured;
-         it's a no-op script include and Checkout.tsx guards the actual call. -->
-    <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+    <!-- Cashfree hosted-checkout SDK now loads lazily from Checkout.tsx only
+         (userchanges.md X-10) instead of on every page. -->
 
     <!-- Meta Pixel Code -->
     <script>

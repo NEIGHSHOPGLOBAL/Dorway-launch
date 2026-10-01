@@ -1,48 +1,71 @@
-import { useEffect, useState } from "react";
-import { NavLink, Outlet, useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import {
+  LayoutDashboard, Filter, Users, ShoppingBag, ShoppingCart, Wallet, RefreshCw,
+  Handshake, UserCheck, Share2, Percent, Send, Flag, History, Settings, LogOut,
+  Pin, PinOff, Search,
+} from "lucide-react";
 import { api, ApiError } from "../../lib/api";
-import { adminLoginPath } from "../../lib/adminHost";
+import { adminLoginPath, adminHref } from "../../lib/adminHost";
 import { useAdminRange } from "../../lib/adminApi";
 
 const NAV = [
-  { group: null, items: [{ to: "/", label: "Home" }] },
+  { group: null, items: [{ to: "/", label: "Home", icon: LayoutDashboard }] },
   {
     group: "Onboarding",
     items: [
-      { to: "/onboarding/funnel", label: "Funnel" },
-      { to: "/onboarding/users", label: "Users" },
+      { to: "/onboarding/funnel", label: "Funnel", icon: Filter },
+      { to: "/onboarding/approvals", label: "Approvals", icon: UserCheck, badgeKey: "approvals" as const },
+      { to: "/onboarding/users", label: "Users", icon: Users },
     ],
   },
   {
     group: "Purchases",
     items: [
-      { to: "/purchases", label: "Overview" },
-      { to: "/purchases/checkouts", label: "Checkouts" },
-      { to: "/purchases/payments", label: "Payments" },
-      { to: "/purchases/reconciliation", label: "Reconciliation" },
+      { to: "/purchases", label: "Overview", icon: ShoppingBag },
+      { to: "/purchases/checkouts", label: "Checkouts", icon: ShoppingCart },
+      { to: "/purchases/payments", label: "Payments", icon: Wallet },
+      { to: "/purchases/reconciliation", label: "Reconciliation", icon: RefreshCw },
     ],
   },
   {
     group: "Affiliates",
     items: [
-      { to: "/affiliates", label: "Overview" },
-      { to: "/affiliates/partners", label: "Partners" },
-      { to: "/affiliates/referrals", label: "Referrals" },
-      { to: "/affiliates/commissions", label: "Commissions" },
-      { to: "/affiliates/payouts", label: "Payouts", badgeKey: "payouts" as const },
-      { to: "/affiliates/flags", label: "Flags", badgeKey: "flags" as const },
+      { to: "/affiliates", label: "Overview", icon: Handshake },
+      { to: "/affiliates/partners", label: "Partners", icon: UserCheck },
+      { to: "/affiliates/referrals", label: "Referrals", icon: Share2 },
+      { to: "/affiliates/commissions", label: "Commissions", icon: Percent },
+      { to: "/affiliates/payouts", label: "Payouts", icon: Send, badgeKey: "payouts" as const },
+      { to: "/affiliates/flags", label: "Flags", icon: Flag, badgeKey: "flags" as const },
     ],
   },
-  { group: null, items: [{ to: "/audit-log", label: "Audit log" }, { to: "/settings", label: "Settings" }] },
+  { group: null, items: [{ to: "/audit-log", label: "Audit log", icon: History }, { to: "/settings", label: "Settings", icon: Settings }] },
 ];
+
+function searchResultHref(group: string, id: string): string | null {
+  if (group === "partners") return adminHref(`/affiliates/partners/${id}`);
+  if (group === "users") return adminHref(`/onboarding/users/${id}`);
+  return null;
+}
+
+function Mark() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true">
+      <rect width="40" height="40" rx="11" fill="#12211C" />
+      <path d="M12 31V19a8 8 0 0 1 16 0v12" fill="none" stroke="#FFFFFF" strokeWidth="3.4" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 export function AdminShell() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [checking, setChecking] = useState(true);
-  const [badges, setBadges] = useState<{ payouts: number; flags: number }>({ payouts: 0, flags: 0 });
-  const [searchParams] = useSearchParams();
+  const [pinned, setPinned] = useState(() => localStorage.getItem("dw_admin_nav_pinned") === "1");
+  const [badges, setBadges] = useState<{ payouts: number; flags: number; approvals: number }>({ payouts: 0, flags: 0, approvals: 0 });
   const range = useAdminRange();
   const [searchOpen, setSearchOpen] = useState(false);
+  const searchBlurTimer = useRef<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Record<string, { id: string; label: string; sub: string }[]> | null>(null);
 
@@ -59,7 +82,8 @@ export function AdminShell() {
     if (checking) return;
     api.get<{ items: unknown[] }>("/admin/payouts?status=requested").then((r) => setBadges((b) => ({ ...b, payouts: r.items.length }))).catch(() => {});
     api.get<{ items: unknown[] }>("/admin/flags?status=open").then((r) => setBadges((b) => ({ ...b, flags: r.items.length }))).catch(() => {});
-  }, [checking]);
+    api.get<{ items: unknown[] }>("/admin/approvals").then((r) => setBadges((b) => ({ ...b, approvals: r.items.length }))).catch(() => {});
+  }, [checking, location.pathname]);
 
   useEffect(() => {
     if (searchQuery.trim().length < 2) {
@@ -67,10 +91,17 @@ export function AdminShell() {
       return;
     }
     const t = setTimeout(() => {
-      api.get(`/admin/search?q=${encodeURIComponent(searchQuery)}`).then(setSearchResults).catch(() => {});
+      api.get<Record<string, { id: string; label: string; sub: string }[]>>(`/admin/search?q=${encodeURIComponent(searchQuery)}`).then(setSearchResults).catch(() => {});
     }, 250);
     return () => clearTimeout(t);
   }, [searchQuery]);
+
+  function togglePin() {
+    setPinned((p) => {
+      localStorage.setItem("dw_admin_nav_pinned", p ? "0" : "1");
+      return !p;
+    });
+  }
 
   async function logout() {
     await api.post("/admin/logout");
@@ -82,21 +113,39 @@ export function AdminShell() {
   return (
     <div className="admin">
       <div className="admin-shell">
-        <aside className="admin-sidebar">
-          <h1>dorway admin</h1>
+        <aside className={`admin-sidebar${pinned ? " pinned" : ""}`}>
+          <div className="admin-sidebar-brand">
+            <Mark />
+            <span>dorway admin</span>
+          </div>
+
           {NAV.map((section, i) => (
             <div className="admin-nav-group" key={i}>
               {section.group && <h4>{section.group}</h4>}
-              {section.items.map((item) => (
-                <NavLink key={item.to} to={item.to} end={item.to === "/"} className={({ isActive }) => `admin-nav-link${isActive ? " active" : ""}`}>
-                  <span>{item.label}</span>
-                  {"badgeKey" in item && item.badgeKey && badges[item.badgeKey] > 0 && <span className="admin-nav-badge">{badges[item.badgeKey]}</span>}
-                </NavLink>
-              ))}
+              {section.items.map((item) => {
+                const Icon = item.icon;
+                const badgeCount = "badgeKey" in item && item.badgeKey ? badges[item.badgeKey] : 0;
+                return (
+                  <NavLink key={item.to} to={adminHref(item.to)} end={item.to === "/"} className={({ isActive }) => `admin-nav-link${isActive ? " active" : ""}`}>
+                    <Icon size={19} />
+                    <span className="admin-nav-link-label">{item.label}</span>
+                    {badgeCount > 0 && <span className="admin-nav-badge">{badgeCount}</span>}
+                    {badgeCount > 0 && <span className="admin-nav-dot" />}
+                  </NavLink>
+                );
+              })}
             </div>
           ))}
-          <div className="admin-nav-group">
-            <button className="admin-link-btn" onClick={logout}>Log out</button>
+
+          <div className="admin-sidebar-foot">
+            <button className="admin-pin-btn" onClick={togglePin} title={pinned ? "Unpin sidebar" : "Keep sidebar open"}>
+              {pinned ? <PinOff size={17} /> : <Pin size={17} />}
+              <span className="admin-nav-link-label">{pinned ? "Unpin" : "Keep open"}</span>
+            </button>
+            <button className="admin-pin-btn" onClick={logout}>
+              <LogOut size={17} />
+              <span className="admin-nav-link-label">Log out</span>
+            </button>
           </div>
         </aside>
 
@@ -121,34 +170,59 @@ export function AdminShell() {
               Include test accounts
             </label>
             <div className="admin-search" style={{ position: "relative" }}>
+              <Search size={15} style={{ position: "absolute", left: 11, top: "50%", translate: "0 -50%", color: "var(--ink-soft)", pointerEvents: "none" }} />
               <input
                 type="text"
                 placeholder="Search phone, email, business, code, order id, UTR…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => setSearchOpen(true)}
-                onBlur={() => setTimeout(() => setSearchOpen(false), 150)}
+                onFocus={() => {
+                  if (searchBlurTimer.current) window.clearTimeout(searchBlurTimer.current);
+                  setSearchOpen(true);
+                }}
+                onBlur={() => {
+                  searchBlurTimer.current = window.setTimeout(() => setSearchOpen(false), 150);
+                }}
+                style={{ paddingLeft: 32 }}
               />
               {searchOpen && searchResults && (
-                <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "var(--a-card)", border: "1px solid var(--a-line)", borderRadius: 8, marginTop: 4, zIndex: 50, maxHeight: 320, overflowY: "auto" }}>
+                <div
+                  onMouseDown={(e) => e.preventDefault()}
+                  style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "var(--card)", border: "1px solid var(--line)", borderRadius: 12, marginTop: 6, zIndex: 50, maxHeight: 320, overflowY: "auto", boxShadow: "0 20px 44px -16px rgba(18,33,28,.25)" }}
+                >
                   {Object.entries(searchResults).map(([group, items]) =>
                     items.length > 0 ? (
                       <div key={group} style={{ padding: 8 }}>
-                        <div style={{ fontSize: 11, color: "var(--a-ink-soft)", textTransform: "uppercase", padding: "2px 6px" }}>{group}</div>
-                        {items.map((it) => (
-                          <div key={it.id} style={{ padding: "6px 6px", fontSize: 13 }}>
-                            <div>{it.label}</div>
-                            <div style={{ fontSize: 11.5, color: "var(--a-ink-soft)" }}>{it.sub}</div>
-                          </div>
-                        ))}
+                        <div style={{ fontSize: 11, color: "var(--ink-soft)", textTransform: "uppercase", padding: "2px 6px" }}>{group}</div>
+                        {items.map((it) => {
+                          const href = searchResultHref(group, it.id);
+                          const body = (
+                            <>
+                              <div>{it.label}</div>
+                              <div style={{ fontSize: 11.5, color: "var(--ink-soft)" }}>{it.sub}</div>
+                            </>
+                          );
+                          return href ? (
+                            <Link key={it.id} to={href} onClick={() => setSearchOpen(false)} style={{ display: "block", padding: "6px 6px", fontSize: 13, textDecoration: "none", color: "inherit", borderRadius: 8 }}>
+                              {body}
+                            </Link>
+                          ) : (
+                            <div key={it.id} style={{ padding: "6px 6px", fontSize: 13 }}>{body}</div>
+                          );
+                        })}
                       </div>
                     ) : null,
+                  )}
+                  {Object.values(searchResults).every((v) => v.length === 0) && (
+                    <div style={{ padding: 14, fontSize: 13, color: "var(--ink-soft)" }}>No matches.</div>
                   )}
                 </div>
               )}
             </div>
           </div>
-          <Outlet key={searchParams.toString()} />
+          <div key={location.pathname} className="admin-page-enter">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

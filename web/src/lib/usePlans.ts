@@ -1,26 +1,37 @@
 import { useEffect, useState } from "react";
 import { api } from "./api";
 
+export type TermMonths = 1 | 6 | 12;
+
 export interface PlanData {
   code: string;
   name: string;
   normalPaiseMonth: number;
-  earlyPaiseMonth: number;
   ratePaiseMonth: number;
-  isEarlyBirdRate: boolean;
+  discountPercent: number;
   seatCap: number | null;
   numberCap: number;
   features: string[];
   sortOrder: number;
 }
 
-interface PlansResponse {
-  earlyBirdOpen: boolean;
-  gstPercent: number;
-  plans: PlanData[];
+export interface TermData {
+  termMonths: TermMonths;
+  discountPercent: number;
+  monthlyRatePaise: number;
+  subtotalPaise: number;
+  savingsPaise: number;
+  gstPaise: number;
+  totalPaise: number;
+  badge: string | null;
 }
 
-export type TermMonths = 1 | 6 | 12;
+interface PlansResponse {
+  gstPercent: number;
+  terms: TermData[];
+  plans: PlanData[];
+  accessStartsAt: string;
+}
 
 export function usePlans(termMonths: TermMonths = 12) {
   const [data, setData] = useState<PlansResponse | null>(null);
@@ -52,4 +63,9 @@ export function usePlans(termMonths: TermMonths = 12) {
 export function formatRupees(paise: number): string {
   const rupees = paise / 100;
   return `₹${rupees.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+}
+
+export function formatRupeesExact(paise: number): string {
+  const rupees = paise / 100;
+  return `₹${rupees.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }

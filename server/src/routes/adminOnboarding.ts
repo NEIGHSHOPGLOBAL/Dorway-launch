@@ -129,6 +129,60 @@ adminOnboardingRouter.get("/metrics/onboarding/funnel", async (req, res) => {
 });
 
 /* ============================================================
+   Conversion funnel (userchanges.md §9/AD-4) — reads FunnelEvent, a
+   separate append-every-time stream from the account-progress funnel
+   above (which reads first-occurrence OnboardingEvent rows).
+   ============================================================ */
+
+const CONVERSION_STEPS = [
+  "profile_completed",
+  "preview_viewed",
+  "paywall_opened",
+  "checkout_started",
+  "paid",
+  "approved",
+  "setup_scheduled",
+  "setup_submitted",
+  "live",
+] as const;
+
+adminOnboardingRouter.get("/metrics/conversion-funnel", async (req, res) => {
+  const range = parseRange(req.query as Record<string, unknown>);
+
+  const events = await db.funnelEvent.findMany({
+    where: { event: { in: [...CONVERSION_STEPS] }, createdAt: { gte: range.from, lt: range.to } },
+    select: { event: true, userId: true },
+  });
+
+  const usersByStep = new Map<string, Set<string>>();
+  for (const e of events) {
+    if (!e.userId) continue;
+    if (!usersByStep.has(e.event)) usersByStep.set(e.event, new Set());
+    usersByStep.get(e.event)!.add(e.userId);
+  }
+
+  const steps = CONVERSION_STEPS.map((step) => ({ step, count: usersByStep.get(step)?.size ?? 0 }));
+
+  res.json({ steps });
+});
+
+// §9 "Report the paywall trigger breakdown" — which locked action sells.
+
+adminOnboardingRouter.get("/metrics/paywall-triggers", async (req, res) => {
+  const range = parseRange(req.query as Record<string, unknown>);
+  const events = await db.funnelEvent.findMany({
+    where: { event: "paywall_opened", createdAt: { gte: range.from, lt: range.to } },
+    select: { meta: true },
+  });
+  const counts = new Map<string, number>();
+  for (const e of events) {
+    const trigger = (e.meta as { trigger?: string } | null)?.trigger ?? "unknown";
+    counts.set(trigger, (counts.get(trigger) ?? 0) + 1);
+  }
+  res.json({ triggers: [...counts.entries()].map(([trigger, count]) => ({ trigger, count })).sort((a, b) => b.count - a.count) });
+});
+
+/* ============================================================
    Cohorts table
    ============================================================ */
 

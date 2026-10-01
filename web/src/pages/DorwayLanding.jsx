@@ -7,10 +7,6 @@
  * EDITING GUIDE
  *  - Copy, CTAs, pricing and FAQ are all in the CONFIG / content objects
  *    near the top of this file. You should rarely need to touch the JSX.
- *  - Anything marked  TODO(launch)  is a placeholder that must be replaced
- *    with real data before the page goes live.
- *  - Set CONFIG.showPlaceholderFlags = false once placeholders are replaced;
- *    it removes the amber "Replace before launch" tags from the page.
  *
  * SCOPE: WhatsApp CRM only. Keep every other product module off this page.
  *
@@ -33,11 +29,16 @@ import {
 
 const CONFIG = {
   brand: "Dorway",
-  showPlaceholderFlags: true, // TODO(launch): set false when placeholders are replaced
+  contact: {
+    email: "hello@dorwayai.com",
+    phoneDisplay: "+91 830702643",
+    phoneTel: "+91830702643",
+    address: "Narela, Delhi 110040",
+  },
 
   // One primary, one secondary, one high-intent action. Nothing else.
   cta: {
-    primary: { label: "Start free", href: "/login" },
+    primary: { label: "Get started", href: "/login" },
     secondary: { label: "Watch demo" },                    // opens the demo modal
     setup: { label: "Book setup", href: "/contact" },
     login: { label: "Log in", href: "/login" },
@@ -52,68 +53,29 @@ const CONFIG = {
   // Accepts an .mp4 link or a YouTube/Vimeo/Loom *embed* URL.
   demoVideoUrl: "",
 
-  reassurance: ["14-day full access", "No credit card", "Free setup for your team"],
+  // userchanges.md X-1 — there is no free trial in the real flow (login →
+  // preview → paid plan), so this must not promise one.
+  reassurance: ["Pay only when you're ready", "Setup done with you"],
 };
 
 /* ------------------------------------------------------------
-   PRICING — TODO(launch): every number here is a placeholder.
-   Model assumed: platform fee per workspace, with seats included
-   and a published price for each extra seat.
+   PRICING — userchanges.md P-1/P-5. One plan, three prepaid terms.
+   Keep these numbers in sync with server/src/lib/pricing.ts
+   (TERM_DISCOUNTS) if the base monthly rate ever changes.
    ------------------------------------------------------------ */
 const PRICING = {
   currency: "₹",
-  annualMonthsFree: 2, // annual = pay 10 months, get 12
-  plans: [
-    {
-      id: "starter",
-      name: "Starter",
-      for: "For a small team getting WhatsApp leads under control.",
-      monthly: 1999,
-      seatsIncluded: 3,
-      extraSeat: 499,
-      numbers: 1,
-      aiActions: "300 / month",
-      sequences: "3 active",
-      campaigns: "Not included",
-      support: "Email, next business day",
-      setup: "Self-serve guide",
-    },
-    {
-      id: "growth",
-      name: "Growth",
-      popular: true,
-      for: "For sales teams that live in WhatsApp all day.",
-      monthly: 4999,
-      seatsIncluded: 10,
-      extraSeat: 399,
-      numbers: 2,
-      aiActions: "2,000 / month",
-      sequences: "25 active",
-      campaigns: "Included",
-      support: "Email + WhatsApp, same day",
-      setup: "Founder-led setup call",
-    },
-    {
-      id: "scale",
-      name: "Scale",
-      for: "For agencies and multi-team sales operations.",
-      monthly: 9999,
-      seatsIncluded: 25,
-      extraSeat: 299,
-      numbers: 5,
-      aiActions: "6,000 / month",
-      sequences: "Unlimited",
-      campaigns: "Included",
-      support: "Priority, named contact",
-      setup: "Full pipeline migration",
-    },
+  baseMonthly: 1999,
+  terms: [
+    { months: 1, discountPercent: 0, monthlyRate: 1999, badge: null, blurb: "Pay for one month and see how the team works." },
+    { months: 6, discountPercent: 10, monthlyRate: 1799, badge: "Save 10%", blurb: "A lower monthly rate, paid once for half a year." },
+    { months: 12, discountPercent: 25, monthlyRate: 1499, badge: "Best value", blurb: "The lowest monthly rate, paid once for the year." },
   ],
-  // Rows that are identical on every plan.
+  gstPercent: 18,
   shared: {
-    meta: "Billed by Meta to your own account, at Meta's rates. No markup.", // TODO(launch): confirm billing model (Q13)
-    trial: "14 days, full access, no card",
-    billing: "Monthly, or annual with 2 months free",
-    cancel: "Cancel anytime. Access runs to the end of the paid period. Export your data whenever you like.",
+    meta: "Billed by Meta to your own account, at Meta's rates. No markup.",
+    refund: "Full refund, no questions, any time before launch.",
+    access: "Your term starts on launch day, not today.",
   },
 };
 
@@ -431,23 +393,25 @@ const STYLES = `
 .dw-proof__fact dd { margin: 4px 0 0; font-size: 17px; font-weight: 500; }
 
 /* ---------- pricing ---------- */
-.dw-toggle { display: inline-flex; align-items: center; gap: 4px; padding: 4px; border-radius: 999px; background: var(--paper); border: 1px solid var(--line); margin-top: 32px; }
-.dw-toggle button { height: 40px; padding: 0 18px; border-radius: 999px; font-weight: 600; font-size: 14.5px; color: var(--ink-soft); display: inline-flex; align-items: center; gap: 8px; }
-.dw-toggle button.is-on { background: var(--white); color: var(--ink); box-shadow: 0 1px 3px rgba(18,33,28,.12); }
-.dw-plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 48px; align-items: stretch; }
-.dw-plan { position: relative; background: var(--white); border: 1px solid var(--line); border-radius: 24px; padding: 32px; display: flex; flex-direction: column; }
-.dw-plan.is-popular { border: 2px solid var(--ink); padding: 31px; }
-.dw-plan__badge { position: absolute; top: -13px; left: 32px; background: var(--ink); color: #fff; font-size: 12.5px; font-weight: 600; padding: 4px 12px; border-radius: 999px; }
+.dw-plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 56px; align-items: stretch; }
+.dw-plan { position: relative; background: var(--white); border: 1px solid var(--line); border-radius: 24px; padding: 28px 26px 24px; display: flex; flex-direction: column; box-shadow: var(--shadow); }
+.dw-plan.is-popular { border: 2px solid var(--ink); padding: 27px 25px 23px; background: linear-gradient(180deg, var(--mint-soft) 0%, var(--white) 148px); }
+.dw-plan__badge { position: absolute; top: -12px; left: 24px; background: var(--ink); color: #fff; font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 999px; }
+.dw-plan__badge--soft { background: var(--mint); color: var(--green-deep); }
 .dw-plan__name { font-family: var(--display); font-weight: 700; font-size: 22px; }
-.dw-plan__for { color: var(--ink-soft); font-size: 15px; margin-top: 6px; min-height: 48px; }
-.dw-plan__price { display: flex; align-items: baseline; gap: 6px; margin-top: 22px; }
-.dw-plan__amount { font-family: var(--display); font-weight: 700; font-size: 42px; letter-spacing: -0.02em; line-height: 1; }
+.dw-plan__for { color: var(--ink-soft); font-size: 14.5px; line-height: 1.45; margin-top: 8px; min-height: 42px; }
+.dw-plan__price { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px; margin-top: 20px; }
+.dw-plan__amount { font-family: var(--display); font-weight: 700; font-size: 40px; letter-spacing: -0.03em; line-height: 1; }
+.dw-plan.is-popular .dw-plan__amount { color: var(--green-deep); }
 .dw-plan__per { color: var(--ink-soft); font-size: 15px; }
-.dw-plan__note { font-size: 13.5px; color: var(--ink-soft); margin-top: 8px; min-height: 21px; }
-.dw-plan__facts { list-style: none; padding: 0; margin: 24px 0 28px; display: flex; flex-direction: column; gap: 0; border-top: 1px solid var(--line); }
+.dw-plan__was { color: var(--ink-soft); font-size: 15px; text-decoration: line-through; margin-left: 2px; }
+.dw-plan__facts { list-style: none; padding: 0; margin: 22px 0 18px; display: flex; flex-direction: column; border-top: 1px solid var(--line); }
 .dw-plan__facts li { display: flex; justify-content: space-between; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; }
 .dw-plan__facts li span:first-child { color: var(--ink-soft); }
 .dw-plan__facts li span:last-child { font-weight: 600; text-align: right; }
+.dw-plan__facts li.is-save span:last-child { color: var(--green-deep); }
+.dw-plan__facts li.is-total { font-size: 15.5px; }
+.dw-plan__facts li.is-total span { color: var(--ink); font-weight: 700; }
 .dw-plan .dw-btn { width: 100%; margin-top: auto; }
 .dw-plan__trial { text-align: center; font-size: 13px; color: var(--ink-soft); margin-top: 10px; }
 
@@ -535,13 +499,16 @@ const STYLES = `
   .dw-migrate { grid-template-columns: 1fr; padding: 40px 28px; }
   .dw-proof { grid-template-columns: 1fr; }
   .dw-proof__facts { border-left: 0; border-top: 1px solid var(--line); }
-  .dw-plans { grid-template-columns: 1fr; max-width: 480px; margin-inline: auto; }
   .dw-founder { grid-template-columns: 1fr; text-align: center; justify-items: center; }
   .dw-footer__grid { grid-template-columns: 1fr 1fr; }
   .dw-radial { height: auto; padding: 48px 20px; }
   .dw-radial__rings, .dw-radial__pill, .dw-radial__core { display: none; }
   .dw-radial__mobile { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
   .dw-radial__mobile .dw-radial__pill { display: inline-flex; position: static; transform: none; }
+}
+@media (max-width: 780px) {
+  .dw-plans { grid-template-columns: 1fr; max-width: 420px; margin-inline: auto; }
+  .dw-plan__for { min-height: 0; }
 }
 @media (max-width: 640px) {
   .dw-section { padding-block: 72px; }
@@ -626,9 +593,12 @@ const FAQS = [
     a: "Yes. Early customers get hands-on help setting up their first pipeline, owners and follow-up process, and getting the team live.",
   },
   {
-    q: "What happens after my trial?",
-    // TODO(launch): align with real billing behaviour.
-    a: "Pick a plan and keep going with everything you set up during the trial. If you don't pick one, your workspace pauses and your data stays exportable. Monthly plans cancel anytime and run to the end of the paid period. Annual plans are billed upfront for the year.",
+    q: "What happens after I pay?",
+    a: "Our team reviews your account and WhatsApps you within 1 working day to book a setup call. Your term starts on launch day, not the day you pay.",
+  },
+  {
+    q: "Can I try it before paying?",
+    a: "Create an account to see the locked workspace. Purchase a plan to unlock Dorway and connect your real WhatsApp number.",
   },
 ];
 
@@ -683,11 +653,6 @@ function ArchPattern({ className, id }) {
       <rect width="100%" height="100%" fill={`url(#${id})`} />
     </svg>
   );
-}
-
-function Flag({ children = "Replace before launch" }) {
-  if (!CONFIG.showPlaceholderFlags) return null;
-  return <span className="dw-flag"><Clock size={12} />{children}</span>;
 }
 
 function PrimaryCTA({ className = "" }) {
@@ -1587,138 +1552,76 @@ function Migration() {
 }
 
 /* ============================================================
-   CUSTOMER PROOF — TODO(launch): real customer only. Remove the
-   <CustomerProof /> line in the page if you have none yet.
-   ============================================================ */
-
-const PROOF = {
-  quote: "[One very specific statement about what changed operationally.]",
-  name: "[Customer name]",
-  role: "[Role, company]",
-  before: "[Real previous workflow]",
-  after: "[Real new workflow]",
-  result: "[Real measurable result, only if actually measured]",
-};
-
-function CustomerProof() {
-  return (
-    <section className="dw-section" aria-labelledby="proof-h" style={{ paddingTop: 0 }}>
-      <div className="dw-wrap">
-        <div className="dw-center">
-          <h2 id="proof-h" className="dw-h2">Don't take our word for it.</h2>
-          <div style={{ marginTop: 14 }}><Flag /></div>
-        </div>
-        <div className="dw-proof">
-          <div className="dw-proof__quote">
-            <div className="dw-proof__logo">Customer logo</div>
-            <blockquote>"{PROOF.quote}"</blockquote>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <Avatar name="C N" i={0} />
-              <div><div style={{ fontWeight: 600 }}>{PROOF.name}</div><div className="dw-small">{PROOF.role}</div></div>
-            </div>
-          </div>
-          <dl className="dw-proof__facts" style={{ margin: 0 }}>
-            <div className="dw-proof__fact"><dt>Before {CONFIG.brand}</dt><dd>{PROOF.before}</dd></div>
-            <div className="dw-proof__fact"><dt>After {CONFIG.brand}</dt><dd>{PROOF.after}</dd></div>
-            <div className="dw-proof__fact"><dt>Result</dt><dd>{PROOF.result}</dd></div>
-          </dl>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ============================================================
    PRICING
    ============================================================ */
 
 const fmt = (n) => `${PRICING.currency}${Math.round(n).toLocaleString("en-IN")}`;
 
 function Pricing() {
-  const [annual, setAnnual] = useState(false);
-  const priceOf = (p) => (annual ? (p.monthly * (12 - PRICING.annualMonthsFree)) / 12 : p.monthly);
-  const P = PRICING.plans;
-
-  const rows = [
-    { label: "Platform fee", get: (p) => <>{fmt(priceOf(p))} / month{annual && <span className="dw-muted"> billed yearly</span>}</> },
-    { label: "Users included", get: (p) => `${p.seatsIncluded} users` },
-    { label: "Each additional user", get: (p) => `${fmt(p.extraSeat)} / month` },
-    { label: "WhatsApp numbers", get: (p) => `${p.numbers} included` },
-    { label: "AI actions", get: (p) => p.aiActions },
-    { label: "Follow-up sequences", get: (p) => p.sequences },
-    { label: "Bulk campaigns", get: (p) => p.campaigns },
-    { label: "Support", get: (p) => p.support },
-    { label: "Setup help", get: (p) => p.setup },
-    { label: "WhatsApp / Meta fees", shared: PRICING.shared.meta },
-    { label: "Free trial", shared: PRICING.shared.trial },
-    { label: "Billing", shared: PRICING.shared.billing },
-    { label: "Cancellation", shared: PRICING.shared.cancel },
+  const included = [
+    "Shared team inbox",
+    "Automatic lead assignment",
+    "Follow-up sequences",
+    "Pipeline for every lead",
+    "Hands-on setup with our team",
+    "Priority support",
   ];
 
   return (
     <section className="dw-section" id="pricing" aria-labelledby="price-h" style={{ background: "var(--paper)" }}>
       <div className="dw-wrap">
         <div className="dw-center dw-measure" style={{ maxWidth: 760 }}>
-          <h2 id="price-h" className="dw-h2">Pricing your whole team can understand.</h2>
-          <p className="dw-lead" style={{ marginTop: 16 }}>No mystery quote just to find out whether {CONFIG.brand} fits your budget. Every fee, limit and rule is on this page.</p>
-          <div style={{ marginTop: 14 }}><Flag>Placeholder prices</Flag></div>
-          <div className="dw-toggle" role="group" aria-label="Billing period">
-            <button type="button" className={!annual ? "is-on" : ""} aria-pressed={!annual} onClick={() => setAnnual(false)}>Monthly</button>
-            <button type="button" className={annual ? "is-on" : ""} aria-pressed={annual} onClick={() => setAnnual(true)}>
-              Annual <span className="dw-chip dw-chip--green">{PRICING.annualMonthsFree} months free</span>
-            </button>
-          </div>
+          <h2 id="price-h" className="dw-h2">One plan. Everything your team needs.</h2>
+          <p className="dw-lead" style={{ marginTop: 16 }}>Pick how long. Longer terms cost less per month.</p>
         </div>
 
         <div className="dw-plans">
-          {P.map((p) => (
-            <article key={p.id} className={`dw-plan ${p.popular ? "is-popular" : ""}`} aria-label={`${p.name} plan`}>
-              {p.popular && <span className="dw-plan__badge">Most popular</span>}
-              <h3 className="dw-plan__name">{p.name}</h3>
-              <p className="dw-plan__for">{p.for}</p>
-              <div className="dw-plan__price">
-                <span key={annual ? "a" : "m"} className="dw-plan__amount">{fmt(priceOf(p))}</span>
-                <span className="dw-plan__per">/ month</span>
-              </div>
-              <p className="dw-plan__note">{annual ? `Billed ${fmt(priceOf(p) * 12)} yearly` : "Billed monthly"}, excluding GST</p>
-              <ul className="dw-plan__facts">
-                <li><span>Users included</span><span>{p.seatsIncluded}</span></li>
-                <li><span>Extra user</span><span>{fmt(p.extraSeat)} / mo</span></li>
-                <li><span>WhatsApp numbers</span><span>{p.numbers}</span></li>
-                <li><span>AI actions</span><span>{p.aiActions}</span></li>
-                <li><span>Follow-up sequences</span><span>{p.sequences}</span></li>
-                <li><span>Bulk campaigns</span><span>{p.campaigns}</span></li>
-              </ul>
-              <a href={`${CONFIG.cta.primary.href}?plan=${p.id}`} className={`dw-btn ${p.popular ? "dw-btn--primary" : "dw-btn--ghost"}`}>{CONFIG.cta.primary.label}</a>
-              <p className="dw-plan__trial">{PRICING.shared.trial}</p>
-            </article>
+          {PRICING.terms.map((t) => {
+            const subtotal = t.monthlyRate * t.months;
+            const gst = Math.round((subtotal * PRICING.gstPercent) / 100);
+            const total = subtotal + gst;
+            const savings = (PRICING.baseMonthly - t.monthlyRate) * t.months;
+            const popular = t.months === 12;
+            const href = `/login?next=${encodeURIComponent(`/checkout/growth?term=${t.months}`)}`;
+            const label = `${t.months} month${t.months > 1 ? "s" : ""}`;
+            return (
+              <article key={t.months} className={`dw-plan${popular ? " is-popular" : ""}`} aria-label={`${label} plan`}>
+                {t.badge && <span className={`dw-plan__badge${popular ? "" : " dw-plan__badge--soft"}`}>{t.badge}</span>}
+                <h3 className="dw-plan__name">{label}</h3>
+                <p className="dw-plan__for">{t.blurb}</p>
+                <div className="dw-plan__price">
+                  <span className="dw-plan__amount">{fmt(t.monthlyRate)}</span>
+                  <span className="dw-plan__per">/ month</span>
+                  {savings > 0 && <span className="dw-plan__was">{fmt(PRICING.baseMonthly)}</span>}
+                </div>
+                <ul className="dw-plan__facts">
+                  <li><span>Billed today</span><span>{fmt(subtotal)}</span></li>
+                  <li><span>GST (18%)</span><span>{fmt(gst)}</span></li>
+                  {savings > 0 && <li className="is-save"><span>You save</span><span>{fmt(savings)}</span></li>}
+                  <li className="is-total"><span>Total due</span><span>{fmt(total)}</span></li>
+                </ul>
+                <a href={href} className={`dw-btn ${popular ? "dw-btn--primary" : "dw-btn--ghost"}`}>{CONFIG.cta.primary.label}</a>
+              </article>
+            );
+          })}
+        </div>
+        <p className="dw-plan__trial" style={{ marginTop: 20 }}>{PRICING.shared.access}</p>
+
+        <ul className="dw-seelist" style={{ maxWidth: 480, margin: "32px auto 0" }}>
+          {included.map((f) => (
+            <li key={f}><span className="dw-seelist__tick"><Check size={15} strokeWidth={2.5} /></span>{f}</li>
           ))}
-        </div>
+        </ul>
 
-        <div className="dw-table-wrap">
-          <table className="dw-table">
-            <caption>Everything you'll pay for, and everything you get</caption>
-            <thead>
-              <tr><th scope="col"><span className="dw-muted" style={{ fontFamily: "var(--body)", fontSize: 14, fontWeight: 500 }}>Plan</span></th>{P.map((p) => <th key={p.id} scope="col">{p.name}</th>)}</tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r.label}>
-                  <th scope="row">{r.label}</th>
-                  {r.shared ? <td colSpan={P.length} className="is-shared">{r.shared}</td> : P.map((p) => <td key={p.id}>{r.get(p)}</td>)}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* TODO(launch): this assumes customers pay Meta directly. Rewrite if you rebill messaging. */}
         <div className="dw-meta-note">
           <span className="dw-meta-note__icon"><Phone size={20} /></span>
           <p>
-            <strong>About WhatsApp message charges.</strong> Meta charges for WhatsApp messages separately from your {CONFIG.brand} plan, at rates that depend on the country and the type of message. You add your own payment method to your own WhatsApp Business Account and pay Meta directly. We don't resell messaging or add a markup, and your message usage is visible inside {CONFIG.brand}, so there are no surprises on either bill.
+            <strong>About WhatsApp message charges.</strong> No per-message markup from us — WhatsApp's own message
+            charges are billed by Meta to your account, at their published rates. You add your own payment method to
+            your own WhatsApp Business Account and pay Meta directly.
           </p>
         </div>
+        <p className="dw-lead" style={{ textAlign: "center", marginTop: 16, fontSize: 15 }}>{PRICING.shared.refund}</p>
       </div>
     </section>
   );
@@ -1805,7 +1708,7 @@ function FinalCTA() {
             <SetupCTA className="dw-btn--outline-light" />
           </div>
           <div className="dw-reassure">
-            {["14-day full access", "No credit card", "Founder setup available"].map((r) => <span key={r}><Check size={15} strokeWidth={2.5} />{r}</span>)}
+            {CONFIG.reassurance.map((r) => <span key={r}><Check size={15} strokeWidth={2.5} />{r}</span>)}
           </div>
         </div>
       </div>
@@ -1826,6 +1729,11 @@ function Footer() {
           <div>
             <Logo />
             <p className="dw-body" style={{ marginTop: 16, maxWidth: 320, fontSize: 15 }}>WhatsApp CRM for teams that sell through conversations. Your number, your data, your customers.</p>
+            <p className="dw-small" style={{ marginTop: 18, display: "grid", gap: 4 }}>
+              <a href={`mailto:${CONFIG.contact.email}`}>{CONFIG.contact.email}</a>
+              <a href={`tel:${CONFIG.contact.phoneTel}`}>{CONFIG.contact.phoneDisplay}</a>
+              <span>{CONFIG.contact.address}</span>
+            </p>
           </div>
           {cols.map((c) => (
             <div key={c.h} className="dw-footer__col">
@@ -2082,7 +1990,6 @@ export default function DorwayLanding() {
         <Agencies />
         <Onboarding />
         <Migration />
-        <CustomerProof />
         <Pricing />
         <FounderSupport />
         <FAQ />

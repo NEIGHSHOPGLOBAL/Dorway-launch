@@ -76,11 +76,14 @@ adminHomeRouter.get("/metrics/home", async (req, res) => {
   const revenueByPlanNamed = revenueByPlan.map((r) => ({ plan: plans.find((p) => p.code === r.planCode)?.name ?? r.planCode, amount: Number(r._sum.subtotalPaise ?? 0n) }));
 
   // Needs attention
-  const [openFlags, webhookFailures, stalePayouts, latestRun] = await Promise.all([
+  const [openFlags, webhookFailures, stalePayouts, latestRun, approvalWaiting] = await Promise.all([
     db.fraudFlag.count({ where: { status: "open" } }),
     db.webhookEvent.count({ where: { error: { not: null }, receivedAt: { gte: new Date(Date.now() - 24 * 3_600_000) } } }),
     db.partnerPayout.count({ where: { status: "requested", requestedAt: { lte: new Date(Date.now() - 3 * 86_400_000) } } }),
     db.reconciliationRun.findFirst({ orderBy: { runDate: "desc" } }),
+    // userchanges.md AD-3 — pending-review entitlements past the 1-working-day
+    // SLA (simplified to a 24h threshold rather than a full business-day calendar).
+    db.entitlement.count({ where: { approvalStatus: "PENDING_REVIEW", createdAt: { lte: new Date(Date.now() - 24 * 3_600_000) } } }),
   ]);
   const reconciliationIssues = latestRun?.issues as { missingInGateway?: unknown[]; missingInDorway?: unknown[] } | null;
 
@@ -101,6 +104,7 @@ adminHomeRouter.get("/metrics/home", async (req, res) => {
       webhookFailures24h: webhookFailures,
       reconciliationMissingInGateway: reconciliationIssues?.missingInGateway?.length ?? 0,
       reconciliationMissingInDorway: reconciliationIssues?.missingInDorway?.length ?? 0,
+      approvalWaiting,
     },
   });
 });

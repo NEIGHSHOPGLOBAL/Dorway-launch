@@ -11,7 +11,27 @@ interface CreateOrderInput {
   note: string;
 }
 
+function cashfreeCustomerId(id: string): string {
+  const cleaned = id.replace(/[^A-Za-z0-9]/g, "");
+  return (cleaned.length >= 3 ? cleaned : `cust${cleaned}`).slice(0, 50);
+}
+
+function cashfreePhone(phone: string): string {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length >= 10) return digits.slice(-10);
+  return "9999999999";
+}
+
+function cashfreeName(name: string): string {
+  const trimmed = name.trim().slice(0, 100);
+  return trimmed.length >= 3 ? trimmed : "Customer";
+}
+
 export async function cfCreateOrder(input: CreateOrderInput) {
+  const orderMeta: { return_url: string; notify_url?: string } = { return_url: input.returnUrl };
+  // Cashfree rejects a notify URL that is not https, which is normal before deploy.
+  if (input.notifyUrl.startsWith("https://")) orderMeta.notify_url = input.notifyUrl;
+
   const res = await fetch(`${config.cashfree.baseUrl}/orders`, {
     method: "POST",
     headers: {
@@ -26,15 +46,12 @@ export async function cfCreateOrder(input: CreateOrderInput) {
       order_amount: Number(input.orderAmountRupees.toFixed(2)),
       order_currency: "INR",
       customer_details: {
-        customer_id: input.customer.id,
+        customer_id: cashfreeCustomerId(input.customer.id),
         customer_email: input.customer.email,
-        customer_phone: input.customer.phone || "9999999999",
-        customer_name: input.customer.name,
+        customer_phone: cashfreePhone(input.customer.phone),
+        customer_name: cashfreeName(input.customer.name),
       },
-      order_meta: {
-        return_url: input.returnUrl,
-        notify_url: input.notifyUrl,
-      },
+      order_meta: orderMeta,
       order_expiry_time: input.expiresAt,
       order_note: input.note,
     }),
@@ -60,6 +77,32 @@ export async function cfGetOrder(orderId: string) {
     throw new Error(`Cashfree get-order failed: ${res.status} ${body}`);
   }
   return (await res.json()) as { order_status: string };
+}
+
+// userchanges.md AD-2 "Reject" — initiates a full refund via Cashfree's
+// refunds endpoint. The REFUND_STATUS_WEBHOOK handler (routes/checkout.ts)
+// is what actually flips the order/entitlement to REFUNDED once Cashfree
+// confirms — this call only starts that process.
+export async function cfCreateRefund(input: { cfOrderId: string; refundId: string; amountRupees: number; note: string }) {
+  const res = await fetch(`${config.cashfree.baseUrl}/orders/${input.cfOrderId}/refunds`, {
+    method: "POST",
+    headers: {
+      "x-client-id": config.cashfree.appId,
+      "x-client-secret": config.cashfree.secretKey,
+      "x-api-version": config.cashfree.apiVersion,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      refund_amount: Number(input.amountRupees.toFixed(2)),
+      refund_id: input.refundId,
+      refund_note: input.note,
+    }),
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Cashfree create-refund failed: ${res.status} ${body}`);
+  }
+  return (await res.json()) as { refund_id: string; cf_refund_id?: string; refund_status: string };
 }
 
 export interface CfPaymentAttempt {

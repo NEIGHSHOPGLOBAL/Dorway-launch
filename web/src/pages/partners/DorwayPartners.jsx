@@ -361,7 +361,7 @@ html:has(.dw) { scroll-behavior: smooth; }
 .dw-codecard .dw-arch { position: absolute; inset: 0; z-index: -1; color: #fff; opacity: .05; }
 .dw-codecard .dw-final__glow { inset: auto -20% -60% 30%; }
 .dw-codecard__words { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
-.dw-codecard__words span { padding: 6px 12px; border-radius: 10px; background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.14); font-family: var(--mono); font-size: 15px; }
+.dw-codecard__words span { padding: 8px 14px; border-radius: 10px; background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.14); font-family: var(--mono); font-size: 22px; letter-spacing: 0.04em; }
 .dw-linkfield { display: flex; align-items: center; gap: 8px; margin-top: 16px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14); border-radius: 12px; padding: 6px 6px 6px 14px; }
 .dw-linkfield code { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--mono); font-size: 13px; color: #CFE0D8; }
 .dw-iconbtn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 9px; font-size: 13.5px; font-weight: 600; transition: background .2s; }
@@ -509,7 +509,6 @@ function Mark({ size = 36, dark = true }) {
     <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden="true">
       <rect width="40" height="40" rx="11" fill={bg} />
       <path d="M12 31V19a8 8 0 0 1 16 0v12" fill="none" stroke={fg} strokeWidth="3.4" strokeLinecap="round" />
-      <path d="M17.5 31v-9.5a2.5 2.5 0 0 1 5 0V31" fill="none" stroke="#5FD3A1" strokeWidth="3.4" strokeLinecap="round" />
     </svg>
   );
 }
@@ -682,7 +681,7 @@ function EarningsCalculator() {
           <button type="button" className={!annual ? "is-on" : ""} aria-pressed={!annual} onClick={() => setAnnual(false)}>Monthly</button>
           <button type="button" className={annual ? "is-on" : ""} aria-pressed={annual} onClick={() => setAnnual(true)}>Annual</button>
         </div>
-        {plan && <p className="dw-small" style={{ marginTop: 10 }}>Every referral is on {plan.name} — {money(value)} {annual ? "for the year" : "a month"}{annual && plan.isEarlyBirdRate ? " at the early-bird rate" : ""}.</p>}
+        {plan && <p className="dw-small" style={{ marginTop: 10 }}>Every referral is on {plan.name} — {money(value)} {annual ? "for the year" : "a month"}.</p>}
       </div>
 
       <div className="dw-calc__out">
@@ -724,7 +723,7 @@ function LandingHero() {
           <span className="dw-pill" style={{ marginBottom: 26 }}><Gift size={16} /> {PROGRAM.brand} Partner Program</span>
           <h1 className="dw-h1">Bring a team to {PROGRAM.brand}. Earn 10% of what they pay.</h1>
           <p className="dw-lead">
-            Share your 5-word code with businesses that sell on WhatsApp. When they check out, you earn {PROGRAM.commissionRate * 100}%, plus {money(PROGRAM.bonus.amountPaise)} for every {PROGRAM.bonus.every} teams you bring in within {PROGRAM.bonus.withinDays} days.
+            Share your 5-character code with businesses that sell on WhatsApp. When they check out, you earn {PROGRAM.commissionRate * 100}%, plus {money(PROGRAM.bonus.amountPaise)} for every {PROGRAM.bonus.every} teams you bring in within {PROGRAM.bonus.withinDays} days.
           </p>
           <div className="dw-btn-row">
             <Link className="dw-btn dw-btn--primary" to="/partners/join">Become a partner</Link>
@@ -790,7 +789,7 @@ function HowItWorks() {
             </li>
             <li className="dw-step3">
               <div className="dw-step3__dot"><span><Sparkles size={18} /></span></div>
-              <h3 className="dw-h4">Get your 5-word code</h3>
+              <h3 className="dw-h4">Get your referral code</h3>
               <p>Easy to say on a call, hard to mistype. It comes with a link that tracks every click for {PROGRAM.attributionDays} days.</p>
               <div className="dw-codepills" aria-hidden="true">{["maple", "river", "quiet", "orbit", "lotus"].map((w) => <span key={w} className="dw-codepill">{w}</span>)}</div>
             </li>
@@ -896,9 +895,9 @@ function FairPlay() {
 }
 
 const PARTNER_FAQS = [
-  { q: "How do I join?", a: "Tap Become a partner, add your name, phone and email, and enter the code we send on WhatsApp. Your 5-word referral code is ready straight away." },
+  { q: "How do I join?", a: "Tap Become a partner, add your name, phone and email, and enter the code we send on WhatsApp. Your 5-character referral code is ready straight away." },
   { q: "Is there a fee to join?", a: "No. The program is free and you don't need to be a Dorway customer." },
-  { q: "How is a referral tracked?", a: `Two ways. A click on your link is remembered for ${PROGRAM.attributionDays} days on that device. Or the customer types your 5-word code at checkout. If both exist, the code typed at checkout wins.` },
+  { q: "How is a referral tracked?", a: `Two ways. A click on your link is remembered for ${PROGRAM.attributionDays} days on that device. Or the customer types your 5-character code at checkout. If both exist, the code typed at checkout wins.` },
   { q: "When does my commission become payable?", a: `Each commission sits on hold for ${PROGRAM.holdDays} days, which is the customer's refund window. After that it moves to approved and counts toward your withdrawable balance. If the customer is refunded inside the window, that commission is reversed.` },
   { q: "How does the speed bonus work?", a: `Every time ${PROGRAM.bonus.every} of your referrals complete checkout within a ${PROGRAM.bonus.withinDays}-day stretch, you earn ${money(PROGRAM.bonus.amountPaise)} on top of your commission. Your dashboard shows how many you've landed in the current stretch and how long is left. The bonus follows the same hold rules as the checkouts behind it.` },
   { q: "When and how do I get paid?", a: `Once your approved balance is at least ${money(PROGRAM.minPayoutPaise)}, request a payout from your dashboard. We pay to your UPI ID or bank account within ${PROGRAM.payoutSla}. A PAN is needed for payouts, and tax is deducted at source where the law requires it.` },
@@ -937,7 +936,7 @@ function PartnerFinal() {
         <div className="dw-final">
           <ArchPattern id="dw-arch-pfinal" />
           <div className="dw-final__glow" aria-hidden="true" />
-          <h2 id="pfinal-h" className="dw-h2">Your 5-word code is one WhatsApp message away.</h2>
+          <h2 id="pfinal-h" className="dw-h2">Your referral code is one WhatsApp message away.</h2>
           <p style={{ fontSize: 19, marginTop: 14 }}>Join in under a minute. Start sharing today.</p>
           <div className="dw-btn-row" style={{ justifyContent: "center", marginTop: 36 }}>
             <Link className="dw-btn dw-btn--light" to="/partners/join">Become a partner</Link>
@@ -1186,7 +1185,7 @@ function Auth({ mode, onAuthed }) {
               <h1 className="dw-h3" style={{ fontSize: 30 }}>You're in, {partner.name.split(" ")[0]}.</h1>
               <p className="dw-body" style={{ marginTop: 8 }}>This is your referral code. Customers can type it at checkout, or you can share your link.</p>
               <div className="dw-reveal" aria-label={`Your code: ${partner.code}`}>
-                {partner.code.split("-").map((w, i) => <span key={i} className="dw-reveal__word">{w}</span>)}
+                {[...partner.code].map((ch, i) => <span key={i} className="dw-reveal__word">{ch}</span>)}
               </div>
               <div className="dw-btn-row" style={{ marginTop: 20 }}>
                 <CopyBtn text={partner.code} label="Copy code" toastMsg="Code copied" />
@@ -1273,7 +1272,7 @@ function CodeCard({ code }) {
         <span style={{ color: "#B9CEC4", fontSize: 14, fontWeight: 500 }}>Your referral code</span>
         <CopyBtn text={code} label="Copy code" className="dw-iconbtn dw-iconbtn--dark" toastMsg="Code copied" />
       </div>
-      <div className="dw-codecard__words">{code.split("-").map((w, i) => <span key={i}>{w}</span>)}</div>
+      <div className="dw-codecard__words">{[...code].map((ch, i) => <span key={i}>{ch}</span>)}</div>
       <div className="dw-linkfield">
         <Link2 size={15} color="#8FA89C" />
         <code>{referralLink(code)}</code>
@@ -1618,7 +1617,7 @@ function ShareView({ d }) {
         <div className="dw-box">
           <div className="dw-box__title">What works best</div>
           <ul className="dw-seelist" style={{ marginTop: 14, gap: 12 }}>
-            {["Share with teams that already get leads on WhatsApp, not everyone.", "Say your code out loud on calls. Five plain words are easy to type.", "Follow up on abandoned checkouts within a day or two.", `Plan a busy week: ${PROGRAM.bonus.every} checkouts in ${PROGRAM.bonus.withinDays} days earns ${money(PROGRAM.bonus.amountPaise)}.`].map((t) => (
+            {["Share with teams that already get leads on WhatsApp, not everyone.", "Say your code out loud on calls. Five characters are easy to type.", "Follow up on abandoned checkouts within a day or two.", `Plan a busy week: ${PROGRAM.bonus.every} checkouts in ${PROGRAM.bonus.withinDays} days earns ${money(PROGRAM.bonus.amountPaise)}.`].map((t) => (
               <li key={t} style={{ fontSize: 15 }}><span className="dw-tick"><Check size={13} strokeWidth={2.5} /></span><span>{t}</span></li>
             ))}
           </ul>

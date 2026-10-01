@@ -9,6 +9,8 @@ import { db } from "../lib/db.js";
 import { config } from "../lib/config.js";
 import { readSession } from "../lib/session.js";
 import { logOnboardingEvent } from "../lib/onboardingEvents.js";
+import { logFunnelEvent } from "../lib/funnelEvents.js";
+import { deriveAccountState } from "../lib/accountState.js";
 
 export const onboardingRouter = Router();
 
@@ -35,6 +37,9 @@ const profileSchema = z.object({
   businessCity: z.string().min(1),
   fallbackEmail: z.string().email().optional(),
   fallbackPhone: z.string().min(6).optional(),
+  // userchanges.md W-1/W-4 — "How many people reply to customers on
+  // WhatsApp?", optional, never blocks the step.
+  teamSize: z.enum(["Just me", "2–5", "6–15", "16+"]).optional(),
 });
 
 onboardingRouter.post("/profile", async (req, res) => {
@@ -65,7 +70,15 @@ onboardingRouter.post("/profile", async (req, res) => {
   if (parsed.data.fallbackPhone && !user.phone) data.phone = parsed.data.fallbackPhone;
 
   await db.user.update({ where: { id: user.id }, data });
+  if (parsed.data.teamSize) {
+    await db.onboardingProfile.upsert({
+      where: { userId: user.id },
+      update: { teamSize: parsed.data.teamSize },
+      create: { userId: user.id, teamSize: parsed.data.teamSize },
+    });
+  }
   await logOnboardingEvent(user.id, "PROFILED");
+  await logFunnelEvent({ userId: user.id, event: "profile_completed", meta: { teamSize: parsed.data.teamSize } });
   res.json({ ok: true });
 });
 
@@ -80,7 +93,11 @@ onboardingRouter.get("/state", async (req, res) => {
 
   const user = await db.user.findUnique({
     where: { id: session.sub },
-    include: { entitlements: { orderBy: { createdAt: "desc" }, take: 1 }, onboardingProfile: true },
+    include: {
+      entitlements: { orderBy: { createdAt: "desc" }, take: 1, include: { order: { include: { plan: true } } } },
+      onboardingProfile: true,
+      orders: { orderBy: { createdAt: "desc" }, take: 1 },
+    },
   });
   if (!user) {
     res.status(401).json({ error: "not_authenticated" });
@@ -88,20 +105,45 @@ onboardingRouter.get("/state", async (req, res) => {
   }
 
   const cfg = await db.launchConfig.findUnique({ where: { id: 1 } });
-  const sold = await db.order.count({ where: { isEarlyBird: true, status: "PAID" } });
+  const entitlement = user.entitlements[0] ?? null;
+  const latestOrder = user.orders[0] ?? null;
+
+  // userchanges.md §8.1 — the single derived state the Dashboard branches on.
+  const accountState = deriveAccountState({
+    latestOrderStatus: latestOrder?.status ?? null,
+    entitlement: entitlement
+      ? { approvalStatus: entitlement.approvalStatus, setupCallAt: entitlement.setupCallAt, accessStartsAt: entitlement.accessStartsAt }
+      : null,
+    now: new Date(),
+  });
 
   res.json({
     onboardingStep: user.onboardingStep,
+    accountState,
     profile: {
       fullName: user.fullName,
       businessName: user.businessName,
       businessCity: user.businessCity,
+      teamSize: user.onboardingProfile?.teamSize ?? null,
     },
-    entitlement: user.entitlements[0]
+    entitlement: entitlement
       ? {
-          planCode: user.entitlements[0].planCode,
-          status: user.entitlements[0].status,
-          accessStartsAt: user.entitlements[0].accessStartsAt.toISOString(),
+          planCode: entitlement.planCode,
+          planName: entitlement.order.plan.name,
+          status: entitlement.status,
+          termMonths: entitlement.termMonths,
+          accessStartsAt: entitlement.accessStartsAt.toISOString(),
+          accessEndsAt: entitlement.accessEndsAt.toISOString(),
+          approvalStatus: entitlement.approvalStatus,
+          approvedAt: entitlement.approvedAt?.toISOString() ?? null,
+          rejectionReason: entitlement.rejectionReason,
+          setupOwnerName: entitlement.setupOwnerName,
+          setupOwnerPhone: entitlement.setupOwnerPhone,
+          setupCallAt: entitlement.setupCallAt?.toISOString() ?? null,
+          paidAt: entitlement.order.paidAt?.toISOString() ?? null,
+          totalPaise: Number(entitlement.order.totalPaise),
+          invoiceEmail: entitlement.order.invoiceEmail,
+          orderId: entitlement.orderId,
         }
       : null,
     setup: {
@@ -110,12 +152,7 @@ onboardingRouter.get("/state", async (req, res) => {
       sectionCDone: user.onboardingProfile?.sectionCDone ?? false,
       submittedAt: user.onboardingProfile?.submittedAt?.toISOString() ?? null,
     },
-    launch: cfg
-      ? {
-          launchAt: cfg.launchAt.toISOString(),
-          earlyBirdSeatsLeft: cfg.earlyBirdSeatCap === null ? null : Math.max(0, cfg.earlyBirdSeatCap - sold),
-        }
-      : null,
+    launch: cfg ? { launchAt: cfg.launchAt.toISOString() } : null,
   });
 });
 
@@ -253,6 +290,7 @@ onboardingRouter.post("/setup/submit", async (req, res) => {
       data: { onboardingStep: advance(user.onboardingStep, "SETUP_SUBMITTED", STEP_ORDER) },
     });
     await logOnboardingEvent(user.id, "SETUP_SUBMITTED");
+    await logFunnelEvent({ userId: user.id, event: "setup_submitted" });
   }
   res.json({ ok: true });
 });

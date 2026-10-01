@@ -18,6 +18,8 @@ import { adminPurchasesRouter } from "./routes/adminPurchases.js";
 import { adminAffiliatesRouter } from "./routes/adminAffiliates.js";
 import { adminHomeRouter } from "./routes/adminHome.js";
 import { adminMetaRouter } from "./routes/adminMeta.js";
+import { adminApprovalsRouter } from "./routes/adminApprovals.js";
+import { funnelRouter } from "./routes/funnel.js";
 import { startAdminJobs } from "./lib/adminJobs.js";
 
 const app = express();
@@ -49,6 +51,8 @@ app.use("/api/admin", adminOnboardingRouter);
 app.use("/api/admin", adminPurchasesRouter);
 app.use("/api/admin", adminAffiliatesRouter);
 app.use("/api/admin", adminMetaRouter);
+app.use("/api/admin", adminApprovalsRouter);
+app.use("/api/funnel", funnelRouter);
 
 app.get("/api/health", (_req, res) => {
   res.json({

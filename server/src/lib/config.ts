@@ -62,7 +62,7 @@ export const config = {
 
   email: {
     resendApiKey: process.env.RESEND_API_KEY ?? "",
-    from: process.env.EMAIL_FROM ?? "Dorway <hello@dorway.app>",
+    from: process.env.EMAIL_FROM ?? "Dorway <hello@dorwayai.com>",
     get isConfigured() {
       return Boolean(this.resendApiKey);
     },
@@ -94,6 +94,8 @@ export const config = {
   supplierStateCode: process.env.SUPPLIER_STATE_CODE ?? "07",
 
   uploadsDir: process.env.UPLOADS_DIR ?? "./uploads",
+
+  supportWhatsAppNumber: process.env.SUPPORT_WHATSAPP_NUMBER ?? "91830702643",
 
   // Superadmin console — separate username/password auth, entirely distinct
   // from customer OTP login. Change these before this ever leaves your machine.

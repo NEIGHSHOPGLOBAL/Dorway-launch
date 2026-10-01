@@ -136,16 +136,17 @@ authRouter.post("/verify-otp", async (req, res) => {
     ? Boolean(await db.user.findUnique({ where: { email: email! } }))
     : Boolean(await db.user.findUnique({ where: { phone: phone! } }));
 
+  // userchanges.md L-5 — consent timestamp captured once, at first signup.
   const user = isEmail
     ? await db.user.upsert({
         where: { email: email! },
         update: { emailVerified: true, lastLoginAt: new Date() },
-        create: { email, emailVerified: true, lastLoginAt: new Date(), signupIp: req.ip },
+        create: { email, emailVerified: true, lastLoginAt: new Date(), signupIp: req.ip, consentAt: new Date() },
       })
     : await db.user.upsert({
         where: { phone: phone! },
         update: { phoneVerified: true, lastLoginAt: new Date() },
-        create: { phone, phoneVerified: true, lastLoginAt: new Date(), signupIp: req.ip },
+        create: { phone, phoneVerified: true, lastLoginAt: new Date(), signupIp: req.ip, consentAt: new Date() },
       });
 
   if (!existedBefore) {
@@ -164,7 +165,7 @@ authRouter.post("/verify-otp", async (req, res) => {
   }
 
   await issueSession(res, { sub: user.id, email: user.email });
-  res.status(200).json({ ok: true, user: { id: user.id, email: user.email, phone: user.phone } });
+  res.status(200).json({ ok: true, isNewUser: !existedBefore, user: { id: user.id, email: user.email, phone: user.phone } });
 });
 
 authRouter.post("/logout", (_req, res) => {

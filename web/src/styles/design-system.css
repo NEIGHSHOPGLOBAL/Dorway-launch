@@ -3,27 +3,30 @@
    Design system per landingpage.md §2
    ========================================================================== */
 
+/* Always light — matches the bottle-green palette used by DorwayLanding.jsx
+   and the partner program (the "new UI"). No dark variant: this site never
+   goes dark regardless of system preference. */
 :root {
-  --paper: #FBFCF8;
+  --paper: #F6F8F5;
   --card: #FFFFFF;
   --ink: #12211C;
-  --ink-soft: #5A6B65;
-  --line: #E4E6E0;
-  --green: #0BA36A;
-  --green-deep: #067A4F;
-  --mint: #CDF3DD;
-  --mint-bright: #A9EEC6;
+  --ink-soft: #56675F;
+  --line: #E3E7E1;
+  --green: #0B8A5C;
+  --green-deep: #065C3C;
+  --mint: #DCF0E4;
+  --mint-bright: #B8E6CC;
   --lime: #B7E85C;
   --sun: #FFD866;
   --amber: #C98A2E;
   --clay: #B24A3F;
 
-  --glow-green: rgba(11, 163, 106, 0.28);
+  --glow-green: rgba(11, 138, 92, 0.28);
   --glow-lime: rgba(183, 232, 92, 0.35);
 
   --shadow-1: 0 1px 2px rgba(18, 33, 28, 0.04);
-  --shadow-pop: 0 12px 32px -8px rgba(11, 163, 106, 0.22);
-  --shadow-lift: 0 20px 44px -12px rgba(11, 163, 106, 0.3);
+  --shadow-pop: 0 12px 32px -8px rgba(11, 138, 92, 0.22);
+  --shadow-lift: 0 20px 44px -12px rgba(11, 138, 92, 0.3);
 
   --radius-lg: 20px;
   --radius-md: 12px;
@@ -33,46 +36,6 @@
   --container-max: 1200px;
 
   color-scheme: light;
-}
-
-:root[data-theme="dark"] {
-  --paper: #0C1512;
-  --card: #121D19;
-  --ink: #EDF2EF;
-  --ink-soft: #8A9A94;
-  --line: #22302B;
-  --green: #2BC786;
-  --green-deep: #1FA872;
-  --mint: #173A2B;
-  --mint-bright: #1E4A36;
-  --lime: #C7EE7E;
-  --sun: #FFD866;
-  --glow-green: rgba(43, 199, 134, 0.3);
-  --glow-lime: rgba(199, 238, 126, 0.22);
-  --shadow-pop: 0 12px 32px -8px rgba(43, 199, 134, 0.32);
-  --shadow-lift: 0 20px 44px -12px rgba(43, 199, 134, 0.4);
-  color-scheme: dark;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #0C1512;
-    --card: #121D19;
-    --ink: #EDF2EF;
-    --ink-soft: #8A9A94;
-    --line: #22302B;
-    --green: #2BC786;
-    --green-deep: #1FA872;
-    --mint: #173A2B;
-    --mint-bright: #1E4A36;
-    --lime: #C7EE7E;
-    --sun: #FFD866;
-    --glow-green: rgba(43, 199, 134, 0.3);
-    --glow-lime: rgba(199, 238, 126, 0.22);
-    --shadow-pop: 0 12px 32px -8px rgba(43, 199, 134, 0.32);
-    --shadow-lift: 0 20px 44px -12px rgba(43, 199, 134, 0.4);
-    color-scheme: dark;
-  }
 }
 
 /* ---- Reset ---- */

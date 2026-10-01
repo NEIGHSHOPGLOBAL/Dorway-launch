@@ -16,3 +16,8 @@ export function adminHomePath(): string {
 export function adminLoginPath(): string {
   return isAdminHost() ? "/login" : "/admin/login";
 }
+
+/** Prefixes an absolute admin-app path with "/admin" when not on the admin subdomain. */
+export function adminHref(path: string): string {
+  return isAdminHost() ? path : `/admin${path}`;
+}

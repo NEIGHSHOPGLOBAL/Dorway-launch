@@ -11,6 +11,11 @@ export function Footer() {
             <p className="footer-brand-desc">
               WhatsApp CRM for teams that sell through conversations. Your number, your data, your customers.
             </p>
+            <p className="footer-brand-desc">
+              <a href="mailto:hello@dorwayai.com">hello@dorwayai.com</a><br />
+              <a href="tel:+91830702643">+91 830702643</a><br />
+              Narela, Delhi 110040
+            </p>
             <div className="footer-socials">
               <a href="#" aria-label="LinkedIn">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
