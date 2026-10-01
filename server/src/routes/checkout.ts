@@ -9,6 +9,11 @@ import { cfCreateOrder, cfGetOrder } from "../lib/cashfree.js";
 import { rateLimit } from "../lib/rateLimit.js";
 import { sendReceiptEmail } from "../lib/email.js";
 import { computeGst, GSTIN_RE, stateFromGstin } from "../lib/gst.js";
+import { attributeReferral, logReferralEvent } from "../lib/partnerAttribution.js";
+import { evaluateBonus, reverseCommission } from "../lib/partnerJobs.js";
+import { PARTNER_PROGRAM } from "../lib/partnerProgram.js";
+import { notifyPartner } from "../lib/partnerNotify.js";
+import { logOnboardingEvent } from "../lib/onboardingEvents.js";
 
 export const checkoutRouter = Router();
 
@@ -17,6 +22,7 @@ const checkoutSchema = z.object({
   termMonths: z.union([z.literal(1), z.literal(6), z.literal(12)]),
   stateCode: z.string().length(2),
   gstin: z.string().regex(GSTIN_RE).optional().or(z.literal("")),
+  referralCode: z.string().optional(), // partners.md §7.1: a typed code overrides the cookie
 });
 
 checkoutRouter.post("/", async (req, res) => {
@@ -68,6 +74,18 @@ checkoutRouter.post("/", async (req, res) => {
 
   const gstBreakdown = computeGst(subtotal, stateCode, config.supplierStateCode);
 
+  if (parsed.data.referralCode) {
+    await attributeReferral({
+      accountId: user.id,
+      partnerCode: parsed.data.referralCode,
+      via: "code",
+      accountPhone: user.phone,
+      accountEmail: user.email,
+    });
+  }
+  const referral = await db.referral.findUnique({ where: { accountId: user.id } });
+  const linkedReferralId = referral && referral.status === "signed_up" ? referral.id : null;
+
   const order = await db.order.create({
     data: {
       userId: user.id,
@@ -83,8 +101,14 @@ checkoutRouter.post("/", async (req, res) => {
       totalPaise: gstBreakdown.totalPaise,
       idempotencyKey: crypto.randomUUID(),
       expiresAt: new Date(Date.now() + 30 * 60_000),
+      referralId: linkedReferralId,
     },
   });
+
+  if (linkedReferralId) {
+    await logReferralEvent(referral!.partnerId, "checkout_started", { source: referral!.attributedVia as "link" | "code", accountId: user.id });
+  }
+  await logOnboardingEvent(user.id, "PLAN_SELECTED");
 
   if (parsed.data.gstin || stateCode !== user.billingStateCode) {
     await db.user.update({
@@ -276,7 +300,10 @@ webhookRouter.post("/cashfree", async (req, res) => {
   res.status(200).send("ok");
 });
 
-async function processWebhookEvent(evt: any) {
+// Exported so routes/adminPurchases.ts's payment resync can replay the exact
+// same PAID-transition side effects (referral, commission, entitlement) a
+// live webhook would have caused — superadmin.md §6.4.
+export async function processWebhookEvent(evt: any) {
   const type = evt.type as string;
   const orderId = evt.data?.order?.order_id as string | undefined;
   if (!orderId) return;
@@ -303,8 +330,28 @@ async function processWebhookEvent(evt: any) {
         },
       });
 
+      // partners.md §7.2/§7.3: commission on the referred account's FIRST paid
+      // order only (§12.2 open decision — this is the doc's stated default).
+      if (order.referralId) {
+        const priorPaidOrders = await tx.order.count({ where: { userId: order.userId, status: "PAID" } });
+        if (priorPaidOrders === 0) {
+          const referral = await tx.referral.findUnique({ where: { id: order.referralId } });
+          if (referral && referral.status === "signed_up") {
+            const paidAt = new Date();
+            const holdUntil = new Date(paidAt.getTime() + PARTNER_PROGRAM.holdDays * 86_400_000);
+            const amount = BigInt(Math.floor(Number(order.totalPaise) * PARTNER_PROGRAM.commissionRate));
+            await tx.commission.create({
+              data: { partnerId: referral.partnerId, orderId: order.id, amount, status: "on_hold", paidAt, holdUntil },
+            });
+            await tx.referral.update({ where: { id: referral.id }, data: { status: "converted" } });
+            await evaluateBonus(tx, referral.partnerId);
+          }
+        }
+      }
+
       await tx.order.update({ where: { id: order.id }, data: { status: "PAID", paidAt: new Date() } });
       await tx.user.update({ where: { id: order.userId }, data: { onboardingStep: "PAID" } });
+      await logOnboardingEvent(order.userId, "PAID", undefined, tx);
 
       const cfg = await tx.launchConfig.findUnique({ where: { id: 1 } });
       const starts = cfg?.launchAt ?? new Date();
@@ -329,12 +376,28 @@ async function processWebhookEvent(evt: any) {
         `${order.plan.name} · ${order.termMonths} months · ₹${(Number(order.totalPaise) / 100).toFixed(2)} paid.`,
       );
     }
+    if (order) {
+      const commission = await db.commission.findUnique({ where: { orderId: order.id }, include: { partner: true } });
+      if (commission) {
+        notifyPartner(
+          commission.partner.phone,
+          "checkout_completed",
+          `${order.plan.name} completed checkout. ₹${Number(commission.amount) / 100} commission is on hold until ${commission.holdUntil.toDateString()}.`,
+        );
+      }
+    }
   } else if (type === "PAYMENT_FAILED_WEBHOOK") {
     await db.order.updateMany({ where: { id: orderId, status: { in: ["CREATED", "PENDING"] } }, data: { status: "FAILED" } });
   } else if (type === "PAYMENT_USER_DROPPED_WEBHOOK") {
     await db.order.updateMany({ where: { id: orderId, status: { in: ["CREATED", "PENDING"] } }, data: { status: "FAILED" } });
   } else if (type === "REFUND_STATUS_WEBHOOK") {
-    await db.order.updateMany({ where: { id: orderId }, data: { status: "REFUNDED" } });
+    // partners.md §7.2: reverse an on-hold commission on refund; after the
+    // hold has already released, no clawback (§12.6 open decision, doc default).
+    const commissionToReverse = await db.commission.findUnique({ where: { orderId } });
+    if (commissionToReverse && commissionToReverse.status === "on_hold") {
+      await reverseCommission(commissionToReverse.id, "order_refunded");
+    }
+    await db.order.updateMany({ where: { id: orderId }, data: { status: "REFUNDED", refundedAt: new Date() } });
     await db.entitlement.updateMany({ where: { orderId }, data: { status: "REFUNDED" } });
   }
 }

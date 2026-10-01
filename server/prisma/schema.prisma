@@ -37,12 +37,42 @@ model User {
   createdAt            DateTime       @default(now()) @map("created_at")
   lastLoginAt          DateTime?      @map("last_login_at")
 
+  // superadmin.md §1.2, §12 — excluded from every metric unless the
+  // "include test accounts" toggle is on.
+  isTest      Boolean @default(false) @map("is_test")
+  source      String? // direct | partner | utm
+  utmSource   String? @map("utm_source")
+  utmMedium   String? @map("utm_medium")
+  utmCampaign String? @map("utm_campaign")
+  device      String? // mobile | desktop, captured at signup
+  signupIp    String? @map("signup_ip") // superadmin.md §7.7 signup-burst rule
+
   orders             Order[]
   entitlements       Entitlement[]
   onboardingProfile  OnboardingProfile?
   onboardingDocuments OnboardingDocument[]
+  referral           Referral?
+  onboardingEvents   OnboardingEvent[]
 
   @@map("users")
+}
+
+// superadmin.md §5.1/§12 — append-only, first occurrence per step, powers
+// the funnel, cohort table and the "stuck for" column. The step column uses
+// the same OnboardingStep enum as users.onboarding_step, so funnel/timeline/
+// current-state always agree — no separate hypothetical step list.
+model OnboardingEvent {
+  id        String         @id @default(uuid())
+  userId    String         @map("user_id")
+  step      OnboardingStep
+  createdAt DateTime       @default(now()) @map("created_at")
+  meta      Json?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, step])
+  @@index([step, createdAt])
+  @@map("onboarding_events")
 }
 
 model LoginOtp {
@@ -122,17 +152,22 @@ model Order {
   cfOrderId             String?     @unique @map("cf_order_id")
   cfPaymentSessionId    String?     @map("cf_payment_session_id")
   idempotencyKey        String      @unique @map("idempotency_key")
+  referralId            String?     @map("referral_id")
   createdAt             DateTime    @default(now()) @map("created_at")
   paidAt                DateTime?   @map("paid_at")
+  refundedAt            DateTime?   @map("refunded_at")
   expiresAt             DateTime    @map("expires_at")
 
   user        User         @relation(fields: [userId], references: [id])
   plan        Plan         @relation(fields: [planCode], references: [code])
   payments    Payment[]
   entitlement Entitlement?
+  referral    Referral?    @relation(fields: [referralId], references: [id])
+  commission  Commission?
 
   @@index([userId, createdAt(sort: Desc)])
   @@index([status])
+  @@index([referralId])
   @@map("orders")
 }
 
@@ -264,14 +299,237 @@ model OnboardingDocument {
   @@map("onboarding_documents")
 }
 
+// superadmin.md §10 admin_audit_log. `actor`/`subject`/`meta` predate this
+// spec (see routes/admin.ts) and stay as the general-purpose fields; the
+// columns below are what every new admin write action fills in.
 model AuditLog {
+  id         String   @id @default(uuid())
+  actor      String
+  action     String
+  subject    String?
+  meta       Json?
+  entityType String?  @map("entity_type")
+  reason     String?
+  before     Json?
+  after      Json?
+  ip         String?
+  userAgent  String?  @map("user_agent")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([actor, createdAt(sort: Desc)])
+  @@index([entityType, subject])
+  @@map("audit_log")
+}
+
+// superadmin.md §12 admin_notes — polymorphic by entityType/entityId
+// (users or partners today), no Prisma relation since the target varies.
+model AdminNote {
+  id         String   @id @default(uuid())
+  entityType String   @map("entity_type") // "user" | "partner"
+  entityId   String   @map("entity_id")
+  adminId    String   @map("admin_id")
+  text       String
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([entityType, entityId, createdAt(sort: Desc)])
+  @@map("admin_notes")
+}
+
+// superadmin.md §7.7 — created only by the fraud_rules job; the panel reviews.
+model FraudFlag {
+  id             String    @id @default(uuid())
+  partnerId      String    @map("partner_id")
+  rule           String
+  evidence       Json
+  status         String    @default("open") // "open" | "dismissed" | "actioned"
+  resolvedBy     String?   @map("resolved_by")
+  resolvedReason String?   @map("resolved_reason")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  resolvedAt     DateTime? @map("resolved_at")
+
+  partner Partner @relation(fields: [partnerId], references: [id])
+
+  @@index([partnerId, status])
+  @@index([rule, partnerId, status])
+  @@map("fraud_flags")
+}
+
+// superadmin.md §6.4 / §12 — one row per daily reconciliation run.
+model ReconciliationRun {
+  id            String   @id @default(uuid())
+  runDate       DateTime @unique @map("run_date")
+  matchedCount  Int      @map("matched_count")
+  matchedAmount BigInt   @map("matched_amount")
+  issues        Json
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@map("reconciliation_runs")
+}
+
+// ---- Partner program ---------------------------------------------------
+// partners.md — frontend at web/src/pages/partners/DorwayPartners.jsx.
+// Business rules (commission %, hold days, bonus shape) live in
+// server/src/lib/partnerProgram.ts and are open decisions per partners.md §12;
+// ship with the documented defaults, revisit once the business confirms them.
+
+enum PartnerStatus {
+  ACTIVE
+  SUSPENDED
+  CLOSED
+}
+
+model Partner {
+  id               String        @id @default(uuid())
+  name             String
+  phone            String        @unique
+  email            String
+  code             String        @unique
+  status           PartnerStatus @default(ACTIVE)
+  termsVersion     String        @map("terms_version")
+  termsAcceptedAt  DateTime      @map("terms_accepted_at")
+  whatsappOptIn    Boolean       @map("whatsapp_opt_in")
+  notifyWhatsapp   Boolean       @default(true) @map("notify_whatsapp")
+  notifyEmail      Boolean       @default(true) @map("notify_email")
+  isTest           Boolean       @default(false) @map("is_test")
+  createdAt        DateTime      @default(now()) @map("created_at")
+
+  payoutMethod   PartnerPayoutMethod?
+  referralEvents ReferralEvent[]
+  referrals      Referral[]
+  commissions    Commission[]
+  bonuses        Bonus[]
+  payouts        PartnerPayout[]
+  fraudFlags     FraudFlag[]
+
+  @@map("partners")
+}
+
+// Mirrors LoginOtp's shape/lookup pattern (most-recent-unconsumed-row,
+// no separate requestId/verificationToken indirection) so partner auth
+// reads the same way as the customer OTP flow in routes/auth.ts.
+model PartnerOtp {
+  id         String    @id @default(uuid())
+  phone      String
+  purpose    String    // "register" | "login"
+  codeHash   String    @map("code_hash")
+  attempts   Int       @default(0)
+  expiresAt  DateTime  @map("expires_at")
+  consumedAt DateTime? @map("consumed_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@index([phone, createdAt(sort: Desc)])
+  @@map("partner_otps")
+}
+
+model PartnerPayoutMethod {
+  partnerId     String    @id @map("partner_id")
+  type          String    // "upi" | "bank"
+  upiId         String?   @map("upi_id")
+  accountName   String?   @map("account_name")
+  accountNumber String?   @map("account_number")
+  ifsc          String?
+  pan           String    // TODO(security): encrypt at rest before real payouts go out — see partners.md §8
+  verifiedAt    DateTime? @map("verified_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  partner Partner @relation(fields: [partnerId], references: [id])
+
+  @@map("partner_payout_methods")
+}
+
+model ReferralEvent {
   id        String   @id @default(uuid())
-  actor     String
-  action    String
-  subject   String?
-  meta      Json?
-  ip        String?
+  partnerId String   @map("partner_id")
+  type      String   // "link_opened" | "code_applied" | "signed_up" | "checkout_started"
+  source    String   // "link" | "code"
+  visitorId String?  @map("visitor_id")
+  accountId String?  @map("account_id")
   createdAt DateTime @default(now()) @map("created_at")
 
-  @@map("audit_log")
+  partner Partner @relation(fields: [partnerId], references: [id])
+
+  @@index([partnerId, createdAt(sort: Desc)])
+  @@map("referral_events")
+}
+
+model Referral {
+  id             String    @id @default(uuid())
+  partnerId      String    @map("partner_id")
+  accountId      String    @unique @map("account_id")
+  attributedVia  String    @map("attributed_via") // "link" | "code"
+  attributedAt   DateTime  @map("attributed_at")
+  status         String    @default("signed_up") // "signed_up" | "converted" | "rejected"
+  rejectionReason String?  @map("rejection_reason")
+
+  partner Partner @relation(fields: [partnerId], references: [id])
+  account User    @relation(fields: [accountId], references: [id])
+  orders  Order[]
+
+  @@index([partnerId])
+  @@map("referrals")
+}
+
+model Commission {
+  id              String    @id @default(uuid())
+  partnerId       String    @map("partner_id")
+  orderId         String    @unique @map("order_id")
+  amount          BigInt    // paise
+  status          String    @default("on_hold") // "on_hold" | "approved" | "paid" | "reversed"
+  paidAt          DateTime  @map("paid_at")
+  holdUntil       DateTime  @map("hold_until")
+  approvedAt      DateTime? @map("approved_at")
+  reversedAt      DateTime? @map("reversed_at")
+  reversalReason  String?   @map("reversal_reason")
+  payoutId        String?   @map("payout_id")
+  bonusId         String?   @map("bonus_id")
+
+  partner Partner        @relation(fields: [partnerId], references: [id])
+  order   Order          @relation(fields: [orderId], references: [id])
+  payout  PartnerPayout? @relation(fields: [payoutId], references: [id])
+  bonus   Bonus?         @relation(fields: [bonusId], references: [id])
+
+  @@index([partnerId, status])
+  @@index([bonusId])
+  @@index([partnerId, paidAt])
+  @@map("commissions")
+}
+
+model Bonus {
+  id        String    @id @default(uuid())
+  partnerId String    @map("partner_id")
+  amount    BigInt    // paise
+  status    String    @default("on_hold") // "on_hold" | "approved" | "paid" | "reversed"
+  earnedAt  DateTime  @map("earned_at")
+  holdUntil DateTime  @map("hold_until")
+  approvedAt DateTime? @map("approved_at")
+  payoutId  String?   @map("payout_id")
+
+  partner     Partner        @relation(fields: [partnerId], references: [id])
+  payout      PartnerPayout? @relation(fields: [payoutId], references: [id])
+  commissions Commission[]
+
+  @@index([partnerId, status])
+  @@map("bonuses")
+}
+
+model PartnerPayout {
+  id              String    @id @default(uuid())
+  partnerId       String    @map("partner_id")
+  amount          BigInt    // gross, paise
+  tdsAmount       BigInt    @default(0) @map("tds_amount")
+  netAmount       BigInt    @map("net_amount")
+  methodSnapshot  Json      @map("method_snapshot")
+  status          String    @default("requested") // "requested" | "processing" | "paid" | "rejected"
+  reference       String?
+  rejectionReason String?   @map("rejection_reason")
+  idempotencyKey  String?   @unique @map("idempotency_key")
+  requestedAt     DateTime  @default(now()) @map("requested_at")
+  paidAt          DateTime? @map("paid_at")
+
+  partner     Partner      @relation(fields: [partnerId], references: [id])
+  commissions Commission[]
+  bonuses     Bonus[]
+
+  @@index([partnerId, status])
+  @@map("partner_payouts")
 }

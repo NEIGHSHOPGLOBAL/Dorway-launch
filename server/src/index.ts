@@ -11,6 +11,14 @@ import { adminRouter } from "./routes/admin.js";
 import { adminAuthRouter } from "./routes/adminAuth.js";
 import { whatsappWebhookRouter } from "./routes/whatsappWebhook.js";
 import { onboardingRouter } from "./routes/onboarding.js";
+import { partnersRouter } from "./routes/partners.js";
+import { startPartnerJobs } from "./lib/partnerJobs.js";
+import { adminOnboardingRouter } from "./routes/adminOnboarding.js";
+import { adminPurchasesRouter } from "./routes/adminPurchases.js";
+import { adminAffiliatesRouter } from "./routes/adminAffiliates.js";
+import { adminHomeRouter } from "./routes/adminHome.js";
+import { adminMetaRouter } from "./routes/adminMeta.js";
+import { startAdminJobs } from "./lib/adminJobs.js";
 
 const app = express();
 
@@ -35,6 +43,12 @@ app.use("/api/account", accountRouter);
 app.use("/api/admin", adminAuthRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/onboarding", onboardingRouter);
+app.use("/api/partners", partnersRouter);
+app.use("/api/admin", adminHomeRouter);
+app.use("/api/admin", adminOnboardingRouter);
+app.use("/api/admin", adminPurchasesRouter);
+app.use("/api/admin", adminAffiliatesRouter);
+app.use("/api/admin", adminMetaRouter);
 
 app.get("/api/health", (_req, res) => {
   res.json({
@@ -45,6 +59,9 @@ app.get("/api/health", (_req, res) => {
     whatsappOtpEnabled: config.whatsapp.otpEnabled,
   });
 });
+
+startPartnerJobs();
+startAdminJobs();
 
 app.listen(config.port, "127.0.0.1", () => {
   console.log(`Dorway API listening on http://127.0.0.1:${config.port}`);

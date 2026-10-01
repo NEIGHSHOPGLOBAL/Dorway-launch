@@ -7,6 +7,8 @@ import { sendOtpEmail } from "../lib/email.js";
 import { sendOtpWhatsApp, normalizePhone } from "../lib/whatsapp.js";
 import { rateLimit } from "../lib/rateLimit.js";
 import { issueSession, clearSession, readSession } from "../lib/session.js";
+import { attributeReferral } from "../lib/partnerAttribution.js";
+import { logOnboardingEvent } from "../lib/onboardingEvents.js";
 
 export const authRouter = Router();
 
@@ -77,8 +79,8 @@ authRouter.post("/request-otp", async (req, res) => {
 });
 
 const verifyOtpSchema = z.union([
-  z.object({ email: z.string().email(), code: z.string().length(6) }),
-  z.object({ phone: z.string().min(6), code: z.string().length(6) }),
+  z.object({ email: z.string().email(), code: z.string().length(6), referralCode: z.string().optional() }),
+  z.object({ phone: z.string().min(6), code: z.string().length(6), referralCode: z.string().optional() }),
 ]);
 
 authRouter.post("/verify-otp", async (req, res) => {
@@ -130,17 +132,36 @@ authRouter.post("/verify-otp", async (req, res) => {
 
   await db.loginOtp.update({ where: { id: otp.id }, data: { consumedAt: new Date() } });
 
+  const existedBefore = isEmail
+    ? Boolean(await db.user.findUnique({ where: { email: email! } }))
+    : Boolean(await db.user.findUnique({ where: { phone: phone! } }));
+
   const user = isEmail
     ? await db.user.upsert({
         where: { email: email! },
         update: { emailVerified: true, lastLoginAt: new Date() },
-        create: { email, emailVerified: true, lastLoginAt: new Date() },
+        create: { email, emailVerified: true, lastLoginAt: new Date(), signupIp: req.ip },
       })
     : await db.user.upsert({
         where: { phone: phone! },
         update: { phoneVerified: true, lastLoginAt: new Date() },
-        create: { phone, phoneVerified: true, lastLoginAt: new Date() },
+        create: { phone, phoneVerified: true, lastLoginAt: new Date(), signupIp: req.ip },
       });
+
+  if (!existedBefore) {
+    await logOnboardingEvent(user.id, "IDENTIFIED");
+  }
+
+  // partners.md §7.1: attribution only happens at first signup, not on every login.
+  if (!existedBefore && data.referralCode) {
+    await attributeReferral({
+      accountId: user.id,
+      partnerCode: data.referralCode,
+      via: "link",
+      accountPhone: user.phone,
+      accountEmail: user.email,
+    });
+  }
 
   await issueSession(res, { sub: user.id, email: user.email });
   res.status(200).json({ ok: true, user: { id: user.id, email: user.email, phone: user.phone } });

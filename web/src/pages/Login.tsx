@@ -4,6 +4,7 @@ import { api, ApiError } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { AuthBrandHeader, AuthBrandFooter } from "../components/AuthBrandPanel";
 import { trackCompleteRegistration } from "../lib/pixel";
+import { getReferralCode } from "../lib/referral";
 
 const REQUEST_ERROR_MESSAGES: Record<string, string> = {
   whatsapp_otp_disabled: "WhatsApp login isn't available right now — try again shortly.",
@@ -79,7 +80,7 @@ export function Login() {
     setError(null);
     setBusy(true);
     try {
-      await api.post("/auth/verify-otp", { phone, code });
+      await api.post("/auth/verify-otp", { phone, code, referralCode: getReferralCode() ?? undefined });
       await refresh();
       trackCompleteRegistration();
       navigate(next, { replace: true });

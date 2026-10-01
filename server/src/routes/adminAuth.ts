@@ -51,29 +51,8 @@ adminAuthRouter.get("/me", async (req, res) => {
 });
 
 // ---- Monitoring: users --------------------------------------------------
-
-adminAuthRouter.get("/users", requireSuperAdmin, async (_req, res) => {
-  const users = await db.user.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 500,
-    include: { entitlements: { orderBy: { createdAt: "desc" }, take: 1 } },
-  });
-
-  res.json({
-    users: users.map((u) => ({
-      id: u.id,
-      email: u.email,
-      phone: u.phone,
-      fullName: u.fullName,
-      businessName: u.businessName,
-      businessCity: u.businessCity,
-      onboardingStep: u.onboardingStep,
-      plan: u.entitlements[0]?.planCode ?? null,
-      createdAt: u.createdAt.toISOString(),
-      lastLoginAt: u.lastLoginAt?.toISOString() ?? null,
-    })),
-  });
-});
+// superadmin.md §11 GET /users lives in routes/adminOnboarding.ts now — it
+// needs filters, cursor pagination and masking this simple version didn't have.
 
 adminAuthRouter.get("/waitlist", requireSuperAdmin, async (_req, res) => {
   const rows = await db.waitlist.findMany({ orderBy: { createdAt: "desc" }, take: 500 });
@@ -88,32 +67,7 @@ adminAuthRouter.get("/waitlist", requireSuperAdmin, async (_req, res) => {
   });
 });
 
-// ---- Monitoring: transactions (actual gateway payments, not just orders) --
-
-adminAuthRouter.get("/transactions", requireSuperAdmin, async (_req, res) => {
-  const payments = await db.payment.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 500,
-    include: { order: { include: { user: true, plan: true } } },
-  });
-
-  res.json({
-    transactions: payments.map((p) => ({
-      id: p.id,
-      cfPaymentId: p.cfPaymentId,
-      status: p.status,
-      method: p.method,
-      amountPaise: Number(p.amountPaise),
-      bankRef: p.bankRef,
-      createdAt: p.createdAt.toISOString(),
-      orderId: p.orderId,
-      planName: p.order.plan.name,
-      termMonths: p.order.termMonths,
-      userPhone: p.order.user.phone,
-      userEmail: p.order.user.email,
-    })),
-  });
-});
+// superadmin.md §6.3 GET /payments lives in routes/adminPurchases.ts now.
 
 adminAuthRouter.get("/stats", requireSuperAdmin, async (_req, res) => {
   const [totalUsers, paidOrders, pendingOrders, waitlistCount] = await Promise.all([

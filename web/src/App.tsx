@@ -1,10 +1,12 @@
 import { useEffect, useRef } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { trackPageView } from "./lib/pixel";
+import { captureReferralFromUrl } from "./lib/referral";
 import { AuthProvider } from "./lib/auth";
 import { ADMIN_HOST, isAdminHost, isMarketingHost } from "./lib/adminHost";
 import { Layout } from "./components/Layout";
-import { Landing } from "./pages/Landing";
+import DorwayLanding from "./pages/DorwayLanding.jsx";
+import DorwayPartners from "./pages/partners/DorwayPartners.jsx";
 import { Login } from "./pages/Login";
 import { Pricing } from "./pages/Pricing";
 import { Checkout } from "./pages/Checkout";
@@ -39,6 +41,10 @@ function RedirectToAdminHost({ path }: { path: string }) {
 }
 
 export function App() {
+  useEffect(() => {
+    captureReferralFromUrl();
+  }, []);
+
   if (isAdminHost()) {
     return (
       <BrowserRouter>
@@ -68,8 +74,9 @@ export function App() {
             path="/admin"
             element={sendAdminToSubdomain ? <RedirectToAdminHost path="/" /> : <AdminDashboard />}
           />
+          <Route path="/" element={<DorwayLanding />} />
+          <Route path="/partners/*" element={<DorwayPartners />} />
           <Route element={<Layout />}>
-            <Route path="/" element={<Landing />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/checkout/:planCode" element={<Checkout />} />
             <Route path="/checkout/return" element={<CheckoutReturn />} />

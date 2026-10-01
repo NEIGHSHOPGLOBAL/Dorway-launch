@@ -8,6 +8,7 @@ import { OnboardingStep } from "@prisma/client";
 import { db } from "../lib/db.js";
 import { config } from "../lib/config.js";
 import { readSession } from "../lib/session.js";
+import { logOnboardingEvent } from "../lib/onboardingEvents.js";
 
 export const onboardingRouter = Router();
 
@@ -64,6 +65,7 @@ onboardingRouter.post("/profile", async (req, res) => {
   if (parsed.data.fallbackPhone && !user.phone) data.phone = parsed.data.fallbackPhone;
 
   await db.user.update({ where: { id: user.id }, data });
+  await logOnboardingEvent(user.id, "PROFILED");
   res.json({ ok: true });
 });
 
@@ -196,6 +198,7 @@ onboardingRouter.post("/setup/section-a", async (req, res) => {
       where: { id: session.sub },
       data: { onboardingStep: advance(user.onboardingStep, "SETUP_STARTED", STEP_ORDER) },
     });
+    await logOnboardingEvent(user.id, "SETUP_STARTED");
   }
   res.json({ ok: true });
 });
@@ -249,6 +252,7 @@ onboardingRouter.post("/setup/submit", async (req, res) => {
       where: { id: session.sub },
       data: { onboardingStep: advance(user.onboardingStep, "SETUP_SUBMITTED", STEP_ORDER) },
     });
+    await logOnboardingEvent(user.id, "SETUP_SUBMITTED");
   }
   res.json({ ok: true });
 });

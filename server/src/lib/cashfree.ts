@@ -61,3 +61,29 @@ export async function cfGetOrder(orderId: string) {
   }
   return (await res.json()) as { order_status: string };
 }
+
+export interface CfPaymentAttempt {
+  cf_payment_id: string;
+  payment_status: string;
+  payment_amount: number;
+  payment_method?: Record<string, unknown>;
+}
+
+// superadmin.md §6.4 reconciliation / payment resync — cfGetOrder only
+// returns the order's overall status, not the payment attempt details a
+// replayed webhook needs (cf_payment_id, amount). This is the same
+// Cashfree PG endpoint the dashboard's "Payments" tab reads from.
+export async function cfGetOrderPayments(orderId: string): Promise<CfPaymentAttempt[]> {
+  const res = await fetch(`${config.cashfree.baseUrl}/orders/${orderId}/payments`, {
+    headers: {
+      "x-client-id": config.cashfree.appId,
+      "x-client-secret": config.cashfree.secretKey,
+      "x-api-version": config.cashfree.apiVersion,
+    },
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Cashfree get-order-payments failed: ${res.status} ${body}`);
+  }
+  return (await res.json()) as CfPaymentAttempt[];
+}

@@ -5,6 +5,7 @@ import { usePlans, formatRupees, type TermMonths } from "../lib/usePlans";
 import { useAuth } from "../lib/auth";
 import { INDIAN_STATES, GSTIN_RE, stateFromGstin } from "../lib/gstStates";
 import { trackInitiateCheckout, trackAddPaymentInfo, trackLead } from "../lib/pixel";
+import { getReferralCode } from "../lib/referral";
 
 declare global {
   interface Window {
@@ -39,6 +40,7 @@ export function Checkout() {
   const [stateCode, setStateCode] = useState("");
   const [gstin, setGstin] = useState("");
   const [address, setAddress] = useState("");
+  const [referralCode, setReferralCode] = useState(() => getReferralCode() ?? "");
   const [quote, setQuote] = useState<Quote | null>(null);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<{ type: "pending" | "error"; message: string } | null>(null);
@@ -100,6 +102,7 @@ export function Checkout() {
         termMonths,
         stateCode: effectiveState,
         gstin: gstinValid && gstin.trim() ? gstin.trim().toUpperCase() : undefined,
+        referralCode: referralCode.trim() || undefined,
       });
 
       if (window.Cashfree) {
@@ -231,6 +234,18 @@ export function Checkout() {
             <div className="field">
               <label htmlFor="address">Billing address (optional)</label>
               <input id="address" type="text" value={address} onChange={(e) => setAddress(e.target.value)} />
+            </div>
+
+            <div className="field">
+              <label htmlFor="referralCode">Partner referral code (optional)</label>
+              <input
+                id="referralCode"
+                type="text"
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value)}
+                placeholder="maple-river-quiet-orbit-lotus"
+              />
+              <div className="field-hint">Got a 5-word code from a Dorway partner? Enter it here.</div>
             </div>
 
             <p className="field-hint">
