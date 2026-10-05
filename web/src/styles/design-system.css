@@ -240,7 +240,7 @@ button:focus-visible,
   gap: 8px;
   color: var(--ink);
 }
-.logo svg { height: 32px; width: auto; }
+.logo-mark { height: 32px; width: 32px; display: block; object-fit: contain; }
 .logo-text {
   font-family: 'Comfortaa', cursive;
   font-weight: 700;

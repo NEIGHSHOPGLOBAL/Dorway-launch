@@ -616,25 +616,23 @@ function Avatar({ name, i = 0, size }) {
   );
 }
 
-/** Doorway mark: an arch with an opening. Used in logo, app mockups, radial core. */
-function Mark({ size = 36, dark = true, accent = true }) {
-  const bg = dark ? "#12211C" : "#FFFFFF";
-  const fg = dark ? "#FFFFFF" : "#12211C";
+/** Doorway mark: used in logo, app mockups, radial core. */
+function Mark({ size = 36 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden="true">
-      <rect width="40" height="40" rx="11" fill={bg} />
-      <path d="M12 31V19a8 8 0 0 1 16 0v12" fill="none" stroke={fg} strokeWidth="3.4" strokeLinecap="round" />
-      {accent && (
-        <path d="M17.5 31v-9.5a2.5 2.5 0 0 1 5 0V31" fill="none" stroke="#5FD3A1" strokeWidth="3.4" strokeLinecap="round" />
-      )}
-    </svg>
+    <img
+      src="/logo.png"
+      width={size}
+      height={size}
+      alt=""
+      style={{ display: "block", borderRadius: size * 0.275, objectFit: "contain" }}
+    />
   );
 }
 
 function Logo() {
   return (
     <a href="#top" className="dw-logo" aria-label={`${CONFIG.brand} home`}>
-      <Mark size={38} accent={false} />
+      <Mark size={38} />
       <span>{CONFIG.brand.toLowerCase()}</span>
     </a>
   );
@@ -1376,7 +1374,7 @@ function AISection() {
         <div className="dw-ai">
           <div className="dw-ask">
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
-              <Mark size={28} dark={false} />
+              <Mark size={28} />
               <strong style={{ fontFamily: "var(--display)", fontSize: 20 }}>Ask {CONFIG.brand}</strong>
             </div>
             <div className="dw-ask__input"><Sparkles size={17} color="#5FD3A1" /><span>{ASK_EXAMPLES[idx].q}</span></div>
@@ -1475,7 +1473,7 @@ function Agencies() {
         <div className="dw-radial">
           <div aria-hidden="true">
             {[560, 430, 310, 200].map((s) => <span key={s} className="dw-radial__ring" style={{ width: s, height: s }} />)}
-            <span className="dw-radial__core"><Mark size={64} dark={false} /></span>
+            <span className="dw-radial__core"><Mark size={64} /></span>
           </div>
           <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
             {AGENCY_USES.map((u) => (

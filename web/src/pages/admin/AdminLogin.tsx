@@ -5,12 +5,7 @@ import { api, ApiError } from "../../lib/api";
 import { adminHomePath } from "../../lib/adminHost";
 
 function Mark() {
-  return (
-    <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
-      <rect width="40" height="40" rx="11" fill="#12211C" />
-      <path d="M12 31V19a8 8 0 0 1 16 0v12" fill="none" stroke="#FFFFFF" strokeWidth="3.4" strokeLinecap="round" />
-    </svg>
-  );
+  return <img src="/logo.png" width="40" height="40" alt="" style={{ display: "block", borderRadius: 11, objectFit: "contain" }} />;
 }
 
 export function AdminLogin() {

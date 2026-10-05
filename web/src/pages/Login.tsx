@@ -93,14 +93,15 @@ const AUTH_STYLES = `
 }
 `;
 
-function Mark({ size = 36, dark = true }: { size?: number; dark?: boolean }) {
-  const bg = dark ? "#12211C" : "#FFFFFF";
-  const fg = dark ? "#FFFFFF" : "#12211C";
+function Mark({ size = 36 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden="true">
-      <rect width="40" height="40" rx="11" fill={bg} />
-      <path d="M12 31V19a8 8 0 0 1 16 0v12" fill="none" stroke={fg} strokeWidth="3.4" strokeLinecap="round" />
-    </svg>
+    <img
+      src="/logo.png"
+      width={size}
+      height={size}
+      alt=""
+      style={{ display: "block", borderRadius: size * 0.275, objectFit: "contain" }}
+    />
   );
 }
 
@@ -214,7 +215,7 @@ export function Login() {
         <aside className="dw-auth__side">
           <ArchPattern id="dw-arch-login" />
           <div className="dw-glow" aria-hidden="true" />
-          <Link to="/" className="dw-logo"><Mark dark={false} /><span>dorway</span></Link>
+          <Link to="/" className="dw-logo"><Mark /><span>dorway</span></Link>
           <img src="/login-left.png" alt="Shared WhatsApp inbox: every enquiry lands in one shared inbox, assigned, followed up, and never lost." className="dw-auth__side-img" />
           <p style={{ color: "#8FA89C", fontSize: 13.5 }}>Your number is only used to verify you and send account updates on WhatsApp.</p>
         </aside>

@@ -49,12 +49,7 @@ function searchResultHref(group: string, id: string): string | null {
 }
 
 function Mark() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true">
-      <rect width="40" height="40" rx="11" fill="#12211C" />
-      <path d="M12 31V19a8 8 0 0 1 16 0v12" fill="none" stroke="#FFFFFF" strokeWidth="3.4" strokeLinecap="round" />
-    </svg>
-  );
+  return <img src="/logo.png" width="28" height="28" alt="" style={{ display: "block", borderRadius: 8, objectFit: "contain" }} />;
 }
 
 export function AdminShell() {
